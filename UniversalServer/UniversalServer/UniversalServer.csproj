@@ -46,11 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commandline\Commandline.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TcpServer\AsynchronousSocketListener.cs" />
-    <Compile Include="TcpServer\ClientTimeoutTimer.cs" />
-    <Compile Include="TcpServer\ServerSettingsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -66,5 +64,6 @@
       <Name>UniversalServerAPI</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

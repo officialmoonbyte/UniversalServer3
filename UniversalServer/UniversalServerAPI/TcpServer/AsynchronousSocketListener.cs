@@ -103,8 +103,7 @@ namespace Moonbyte.UniversalServer.TcpServer
             Socket handler = listener.EndAccept(ar);
 
             //Create the state object
-            ClientWorkObject state = new ClientWorkObject();
-            state.clientSocket = handler;
+            ClientWorkObject state = new ClientWorkObject(handler, this);
             handler.BeginReceive(state.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
         }
 
@@ -149,7 +148,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Send
 
-        private void Send(ClientWorkObject WorkObject, string Data)
+        public void Send(ClientWorkObject WorkObject, string Data)
         {
             // Gets the socket from the work object.
             Socket handler = WorkObject.clientSocket;
