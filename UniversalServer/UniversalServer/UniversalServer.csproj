@@ -49,6 +49,9 @@
     <Compile Include="Commandline\Commandline.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UniversalServer\Universalserver.cs" />
+    <Compile Include="UniversalServer\universalServerCommandLine.cs" />
+    <Compile Include="UniversalServer\UniversalServerSettingsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
