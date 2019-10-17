@@ -1,4 +1,6 @@
-﻿using UniversalServer.Commandline;
+﻿using Moonbyte.UniversalServer.TcpServer;
+using System.Collections.Generic;
+using UniversalServer.Commandline;
 
 namespace UniversalServer
 {
@@ -8,7 +10,8 @@ namespace UniversalServer
         #region Vars
 
         public static universalServerCommandLine Commandline = new universalServerCommandLine();
-        public static universalServerSettingsManager UniversalServerSettingsManager = new universalServerSettingsManager();
+        public static universalServerSettingsManager SettingsManager = new universalServerSettingsManager();
+        public static List<AsynchronousSocketListener> TcpServers = new List<AsynchronousSocketListener>();
 
         #endregion Vars
 
@@ -16,12 +19,13 @@ namespace UniversalServer
 
         public static void Close()
         {
+            SettingsManager.SaveCurrentSettings();
 
+            foreach (AsynchronousSocketListener tcpServer in TcpServers)
+            { tcpServer.Dispose(); }
         }
 
         #endregion Close
-
-
 
     }
 }
