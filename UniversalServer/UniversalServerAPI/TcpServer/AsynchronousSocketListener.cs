@@ -187,6 +187,7 @@ namespace Moonbyte.UniversalServer.TcpServer
                     content = workObject.sb.ToString();
                     if (content.IndexOf("<EOF>") > -1)
                     {
+                        Console.WriteLine(content);
                         //Command Handler
                         CheckInternalCommands(content, workObject);
                         //UserLog

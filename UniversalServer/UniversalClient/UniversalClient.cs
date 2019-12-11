@@ -62,6 +62,7 @@ namespace UniversalClient
             string Final = stringData.Replace("%20%", " ");
             //if (UseEncryption)
             //{ Final = Encryption.Decrypt(Final, Encryption.GetClientPrivateKey()); }
+            Console.WriteLine(Final);
             return Final;
         }
 
