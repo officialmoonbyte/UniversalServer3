@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Moonbyte.Logging;
 
 namespace UniversalServer
 {
@@ -10,6 +6,11 @@ namespace UniversalServer
     {
         static void Main(string[] args)
         {
+            //Initializes ILogger
+            ILogger.SetLoggingEvents();
+
+            //Initializes UniversalServer with the Universalserver class
+            Universalserver.InitializeUniversalServer();
         }
     }
 }

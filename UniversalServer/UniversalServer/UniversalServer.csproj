@@ -36,6 +36,9 @@
     <Reference Include="GFS, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GlobalSettingsFramework.1.3.0\lib\net45\GFS.dll</HintPath>
     </Reference>
+    <Reference Include="MoonbyteSettingsManager, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSM.2.0.0\lib\net45\MoonbyteSettingsManager.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,11 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commandline\Commandline.cs" />
+    <Compile Include="Commandline\ConsoleCommands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UniversalServer\Universalserver.cs" />
-    <Compile Include="UniversalServer\universalServerCommandLine.cs" />
-    <Compile Include="UniversalServer\UniversalServerSettingsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,4 +1,6 @@
-﻿using Moonbyte.UniversalServerAPI;
+﻿using Moonbyte.Logging;
+using Moonbyte.UniversalServerAPI;
+using MoonbyteSettingsManager;
 using System;
 using System.IO;
 using System.Net;
@@ -13,18 +15,53 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Vars
 
-        public string serverName;
-        private ServerSettingsManager ServerSettings;
+        public string ServerName;
+        public int Port;
+        private MSMCore ServerSettings = new MSMCore();
         public ManualResetEvent allDone = new ManualResetEvent(false);
+        public int Clients = 0;
+        bool isListening = false;
+        bool continueListening = false;
+        Socket listener;
 
         #endregion Vars
 
+        #region Directories
+
+        public string ServerDirectory;
+        public string PluginDirectory;
+
+        #endregion Directories
+
+        #region Settings
+
+        private int GetServerPort()
+        {
+            string settingTitle = "ServerPort"; int defaultValue = 7876;
+            if (ServerSettings.CheckSetting(settingTitle))
+            { return int.Parse(ServerSettings.ReadSetting(settingTitle)); }
+            else { ServerSettings.EditSetting(settingTitle, defaultValue.ToString()); return defaultValue; }
+        }
+
+        #endregion Settings
+
         #region Initialization
 
-        public AsynchronousSocketListener(string ServerName)
+        public AsynchronousSocketListener(string serverName, string ServerDirectory)
         {
-            serverName = ServerName;
-            ServerSettings = new ServerSettingsManager(Environment.CurrentDirectory + @"\Servers\" + ServerName);
+            ServerName = serverName;
+            ServerDirectory = Path.Combine(Environment.CurrentDirectory, "Servers", ServerName);
+            PluginDirectory = Path.Combine(ServerDirectory, "Plugins");;
+
+            //Creates the server directory
+            try
+            {
+                if (!Directory.Exists(ServerDirectory)) { Directory.CreateDirectory(ServerDirectory); }
+                if (!Directory.Exists(PluginDirectory)) { Directory.CreateDirectory(PluginDirectory); }
+            }
+            catch { }
+
+            ServerSettings.SettingsDirectory = ServerDirectory;
         }
 
         #endregion
@@ -41,7 +78,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         {
             get
             {
-                string dir = StartupDirectory + @"\" + this.serverName;
+                string dir = Path.Combine(StartupDirectory, this.ServerName);
                 if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 return dir;
             }
@@ -49,18 +86,20 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #endregion GetServerDirectory
 
-        #region InitializeServerSettings
+        #region IsListening
 
+        public bool IsListening()
+        { return isListening; }
 
-
-        #endregion InitializeServerSettings
+        #endregion IsListening
 
         #region StartListening
 
         public void StartListening()
         {
             //Gets the port
-            int ServerPort = ServerSettings.ServerPort;
+            int ServerPort = this.GetServerPort();
+            this.Port = ServerPort;
 
             // Get the IPAddress / endpoint for the socket
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -68,25 +107,38 @@ namespace Moonbyte.UniversalServer.TcpServer
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerPort);
 
             // Initializes a Tcp/IP socket.
-            Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            // Bind the socket and then start listening for incoming connections.
-            try
+            new Thread(new ThreadStart(() =>
             {
-                listener.Bind(localEndPoint);
-                listener.Listen(550);
-
-                while (true)
+                // Bind the socket and then start listening for incoming connections.
+                try
                 {
-                    allDone.Reset();
+                    listener.Bind(localEndPoint);
+                    listener.Listen(550);
 
-                    listener.BeginAccept(new AsyncCallback(AcceptCallBack), listener);
+                    continueListening = true;
 
-                    allDone.WaitOne();
+                    while (continueListening)
+                    {
+                        isListening = true;
+
+                        allDone.Reset();
+
+                        listener.BeginAccept(new AsyncCallback(AcceptCallBack), listener);
+
+                        allDone.WaitOne();
+                    }
+
+                    //Disposes the listener
+                    isListening = false;
+
+                    listener.Close();
+                    listener.Dispose();
                 }
-            }
-            catch (Exception e)
-            { Console.WriteLine(e.ToString()); }
+                catch (Exception e)
+                { ILogger.LogExceptions(e); }
+            })).Start();
         }
 
         #endregion StartListening
@@ -161,6 +213,16 @@ namespace Moonbyte.UniversalServer.TcpServer
         }
 
         #endregion Send
+
+        #region Dispose
+
+        public void Dispose()
+        {
+            if (listener != null)
+            { continueListening = false; }
+        }
+
+        #endregion Dispose
 
         #region SendCallback
 

@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace UniversalServer.Commandline
 {
-    public class Commandline
+    public class CommandLine
     {
 
         #region Vars
@@ -14,10 +14,8 @@ namespace UniversalServer.Commandline
 
         #region Initialization
 
-        public Commandline()
-        {
-
-        }
+        public CommandLine()
+        { InitializeCommandlineThread(); }
 
         #endregion Initialization
 
@@ -34,7 +32,7 @@ namespace UniversalServer.Commandline
                     string[] UserInput = _Userinput.Split(null);
 
                     //Processes the command through the UniversalServerCommandLine object, this object is initialized in the static class Universalserver.
-                    Universalserver.Commandline.ProcessCommand(UserInput); // UserInput is a diffrent object from _Userinput. _Userinput is just the raw string and ProcessCommand needs a array.
+                    Universalserver.ProcessCommand(UserInput); // UserInput is a diffrent object from _Userinput. _Userinput is just the raw string and ProcessCommand needs a array.
                 }
             })).Start();
         }
