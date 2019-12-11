@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UniversalClient\UniversalClient.csproj">
+      <Project>{b2794dac-e927-432a-87f5-1e1fe80f6513}</Project>
+      <Name>UniversalClient</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
