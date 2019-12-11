@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using UniversalClient.Security;
 
-namespace Universalclient
+namespace UniversalClient
 {
-    public class UniversalClient
+    public class Universalclient
     {
 
         #region Vars
 
         private TcpClient Client;
+        ClientRSA Encryption = new ClientRSA();
         public static bool LogEvents;
 
         public bool IsConnected
@@ -22,7 +24,7 @@ namespace Universalclient
 
         #region Initialization
 
-        public UniversalClient(bool logEvents)
+        public Universalclient(bool logEvents)
         {
             LogEvents = logEvents;
             Client = new TcpClient();
@@ -40,7 +42,10 @@ namespace Universalclient
 
             if (Client.Connected)
             {
-
+                SendMessage("Key_ServerPublic|", false, null);
+                this.Encryption.SetServerPublicKey(WaitForResult());
+                SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false);
+                SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false);
             }
         }
 
@@ -73,7 +78,7 @@ namespace Universalclient
             string ArgsSend = string.Join(" ", args);
             if (LogEvents) Console.WriteLine("Args Send : " + ArgsSend);
             string valueToSend = "CLNT|" + Command + " " + ArgsSend;
-            SendMessage(valueToSend); Console.WriteLine("test1");
+            SendMessage(valueToSend);
             return WaitForResult();
         }
 
@@ -85,6 +90,7 @@ namespace Universalclient
         {
             //Sends the message to the client
             string stringToSend = Value.Replace(" ", "%20%");
+            stringToSend += "<EOF>";
             //if (UseEncryption)
             //{
                 //if (Key == null) { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetClientPrivateKey()); }

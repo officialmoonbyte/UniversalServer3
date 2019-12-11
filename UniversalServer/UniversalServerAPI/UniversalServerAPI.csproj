@@ -53,6 +53,7 @@
     <Compile Include="ClientTracker.cs" />
     <Compile Include="ClientWorkObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\ServerRSA.cs" />
     <Compile Include="TcpServer\AsynchronousSocketListener.cs" />
   </ItemGroup>
   <ItemGroup>

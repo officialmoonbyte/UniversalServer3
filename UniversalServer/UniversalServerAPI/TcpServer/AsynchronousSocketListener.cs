@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using UniversalServer.Security;
 
 namespace Moonbyte.UniversalServer.TcpServer
 {
@@ -103,7 +104,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
             // Get the IPAddress / endpoint for the socket
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPAddress ipAddress = IPAddress.Any;
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerPort);
 
             // Initializes a Tcp/IP socket.
@@ -172,27 +173,35 @@ namespace Moonbyte.UniversalServer.TcpServer
             ClientWorkObject workObject = (ClientWorkObject)ar.AsyncState;
             Socket handler = workObject.clientSocket;
 
-            // Read data from the client socket.
-            int bytesRead = handler.EndReceive(ar);
-
-            if (bytesRead > 0)
+            try
             {
-                //Download more data from the client
-                workObject.sb.Append(Encoding.ASCII.GetString(workObject.buffer, 0, bytesRead));
+                // Read data from the client socket.
+                int bytesRead = handler.EndReceive(ar);
 
-                // Check for end-of-file tag, if its not there then it reads more data.
-                content = workObject.sb.ToString();
-                if (content.IndexOf("<EOF>") > -1)
+                if (bytesRead > 0)
                 {
-                    //Command Handler
+                    //Download more data from the client
+                    workObject.sb.Append(Encoding.ASCII.GetString(workObject.buffer, 0, bytesRead));
 
-                    //UserLog
+                    // Check for end-of-file tag, if its not there then it reads more data.
+                    content = workObject.sb.ToString();
+                    if (content.IndexOf("<EOF>") > -1)
+                    {
+                        //Command Handler
+                        CheckInternalCommands(content, workObject);
+                        //UserLog
+                    }
+                    else
+                    {
+                        //Not all data received, get more
+                        handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
+                    }
                 }
-                else
-                {
-                    //Not all data received, get more
-                    handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
-                }
+            }
+            catch (Exception e)
+            {
+                ILogger.LogExceptions(e);
+                ILogger.AddToLog("INFO", "Client disconnected!");
             }
         }
 
@@ -213,6 +222,32 @@ namespace Moonbyte.UniversalServer.TcpServer
         }
 
         #endregion Send
+
+        #region InternalServerCommands
+
+        private bool CheckInternalCommands(string RawCommand, ClientWorkObject workObject)
+        {
+            bool returnValue = false;
+
+            string[] headerSplit = RawCommand.Split('|');
+
+            if (headerSplit[0].ToUpper() == "KEY_SERVERPUBLIC")
+            { Send(workObject, workObject.Encryption.GetServerPublicKey()); }
+            if (headerSplit[0].ToUpper() == "KEY_CLIENTPUBLIC")
+            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); }
+            if (headerSplit[0].ToUpper() == "KEY_CLIENTPRIVATE")
+            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); }
+
+            return returnValue;
+        }
+
+        #region GetPublicServerKey
+
+
+
+        #endregion GetPublicServerKey
+
+        #endregion InternalServerCommands
 
         #region Dispose
 

@@ -1,6 +1,7 @@
 ﻿using Moonbyte.UniversalServer.TcpServer;
 using System.Net.Sockets;
 using System.Text;
+using UniversalServer.Security;
 
 namespace Moonbyte.UniversalServerAPI
 {
@@ -13,6 +14,7 @@ namespace Moonbyte.UniversalServerAPI
 
         public Socket clientSocket = null;
         public AsynchronousSocketListener serverSocket = null;
+        public ServerRSA Encryption = new ServerRSA();
         public ClientSender clientSender;
 
         #endregion Network Objects
