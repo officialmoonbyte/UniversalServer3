@@ -44,6 +44,7 @@ namespace Moonbyte.UniversalServerAPI
         #region Buffer
 
         public const int BufferSize = 1024;
+        public int bufferSize = 1024;
         public byte[] buffer = new byte[BufferSize];
 
         #endregion Buffer 

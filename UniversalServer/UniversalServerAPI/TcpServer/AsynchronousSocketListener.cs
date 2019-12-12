@@ -23,7 +23,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         public int Clients = 0;
         bool isListening = false;
         bool continueListening = false;
-        Socket listener;
+        Socket Serverlistener = null;
 
         #endregion Vars
 
@@ -102,47 +102,69 @@ namespace Moonbyte.UniversalServer.TcpServer
             int ServerPort = this.GetServerPort();
             this.Port = ServerPort;
 
-            // Get the IPAddress / endpoint for the socket
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = IPAddress.Any;
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerPort);
-
-            // Initializes a Tcp/IP socket.
-            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            new Thread(new ThreadStart(() =>
-            {
-                // Bind the socket and then start listening for incoming connections.
-                try
-                {
-                    listener.Bind(localEndPoint);
-                    listener.Listen(550);
-
-                    continueListening = true;
-
-                    while (continueListening)
-                    {
-                        isListening = true;
-
-                        allDone.Reset();
-
-                        listener.BeginAccept(new AsyncCallback(AcceptCallBack), listener);
-
-                        allDone.WaitOne();
-                    }
-
-                    //Disposes the listener
-                    isListening = false;
-
-                    listener.Close();
-                    listener.Dispose();
-                }
-                catch (Exception e)
-                { ILogger.LogExceptions(e); }
-            })).Start();
+            Serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
+            Serverlistener.Listen(200);
+            Serverlistener.BeginAccept(OnSocketAccepted, null);
         }
 
         #endregion StartListening
+
+        #region OnSocketAccepted
+
+        private void OnSocketAccepted(IAsyncResult result)
+        {
+            // This is the client socket, where you send/receive data from after accepting. Keep it in a List<Socket> collection if you need to.
+            Socket client = Serverlistener.EndAccept(result);
+
+            ClientWorkObject workObject = new ClientWorkObject(client, this);
+            client.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
+            Serverlistener.BeginAccept(OnSocketAccepted, null);
+        }
+
+        #endregion OnSocketAccepted
+
+        #region OnDataReceived
+
+        private void OnDataReceived(IAsyncResult result)
+        {
+            ClientWorkObject workObject = result.AsyncState as ClientWorkObject;
+
+            try
+            {
+                int bytesRead = workObject.clientSocket.EndReceive(result);
+
+                //Handles received data in buffer
+                if (bytesRead > 0)
+                {
+                    // There might be more data, so store the data received so far
+                    workObject.sb.Append(Encoding.ASCII.GetString(workObject.buffer, 0, bytesRead));
+
+                    string content = workObject.sb.ToString();
+                    if (content.IndexOf("<EOF>") > -1)
+                    {
+                        workObject.sb = new StringBuilder();
+                        workObject.buffer = new byte[ClientWorkObject.BufferSize];
+
+                        Console.WriteLine(content);
+                        CheckInternalCommands(content, workObject);
+
+                        //Starts a new async receive on the client
+                        workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
+                    }
+                    else
+                    {
+                        workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ILogger.LogExceptions(e);
+            }
+        }
+
+        #endregion OnDataReceived
 
         #region AcceptCallback
 
@@ -195,6 +217,7 @@ namespace Moonbyte.UniversalServer.TcpServer
                     else
                     {
                         //Not all data received, get more
+                        workObject.buffer = new byte[ClientWorkObject.BufferSize];
                         handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
                     }
                 }
@@ -203,6 +226,14 @@ namespace Moonbyte.UniversalServer.TcpServer
             {
                 ILogger.LogExceptions(e);
                 ILogger.AddToLog("INFO", "Client disconnected!");
+            }
+            finally
+            {
+                if (workObject != null && handler != null)
+                {
+                    workObject.buffer = new byte[ClientWorkObject.BufferSize];
+                    handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
+                }
             }
         }
 
@@ -231,13 +262,12 @@ namespace Moonbyte.UniversalServer.TcpServer
             bool returnValue = false;
 
             string[] headerSplit = RawCommand.Split('|');
-
             if (headerSplit[0].ToUpper() == "KEY_SERVERPUBLIC")
             { Send(workObject, workObject.Encryption.GetServerPublicKey()); }
             if (headerSplit[0].ToUpper() == "KEY_CLIENTPUBLIC")
-            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); }
+            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString()); }
             if (headerSplit[0].ToUpper() == "KEY_CLIENTPRIVATE")
-            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); }
+            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString()); }
 
             return returnValue;
         }
@@ -254,7 +284,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         public void Dispose()
         {
-            if (listener != null)
+            if (Serverlistener != null)
             { continueListening = false; }
         }
 
