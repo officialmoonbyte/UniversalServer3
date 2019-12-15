@@ -26,7 +26,7 @@ namespace UniversalClient
         #region Vars
 
         private TcpClient Client;
-        ClientRSA Encryption = new ClientRSA();
+        ClientRSA Encryption;
         public static bool LogEvents;
 
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
@@ -48,6 +48,8 @@ namespace UniversalClient
         {
             LogEvents = logEvents;
             Client = new TcpClient();
+            Encryption = new ClientRSA();
+            Console.WriteLine(Encryption.GetClientPublicKey());
         }
 
         #endregion Intialization
@@ -62,20 +64,23 @@ namespace UniversalClient
 
             if (Client.Connected)
             {
-                SendMessage("Key_ServerPublic|", false, null);
+                SendMessage("Key_ServerPublic ", false);
                 this.Encryption.SetServerPublicKey(WaitForResult());
                 try
                 {
                     string encryptedClientPublicKey = Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey());
-                    Console.WriteLine("YEET ::: " + encryptedClientPublicKey);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.StackTrace);
                 }
                 Console.WriteLine("Yah ::: " + Encryption.GetServerPublicKey());
-                SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
-                SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+                SendMessage("Key_ClientPublic " + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+                SendMessage("Key_ClientPrivate " + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+
+                //Sends in the user data now, gets the user data encrypted first
+                string UserID = FingerPrint.Value();
+                SendMessage("User SetID " + UserID); WaitForResult();
             }
         }
 
@@ -127,16 +132,19 @@ namespace UniversalClient
             }
         }
 
-        public string WaitForResult(bool UseEncryption = false)
+        public string WaitForResult()
         {
             byte[] data = new byte[Client.Client.ReceiveBufferSize];
             int receivedDataLength = Client.Client.Receive(data);
             string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
             if (LogEvents) Console.WriteLine("Server response: " + stringData);
             string Final = stringData.Replace("%20%", " ");
-            if (UseEncryption)
-            { Final = Encryption.Decrypt(Final, Encryption.GetClientPrivateKey()); }
-            Console.WriteLine(Final);
+            string[] splitFinal = Final.Split('|');
+            if (splitFinal[0] == true.ToString())
+            { Final = Encryption.Decrypt(splitFinal[1], Encryption.GetClientPrivateKey()); }
+            else { Final = splitFinal[1]; }
+            Console.WriteLine("Final : " + Final);
+
             return Final;
 
         }
@@ -155,22 +163,23 @@ namespace UniversalClient
             if (LogEvents) Console.WriteLine("Args Send : " + ArgsSend);
             string valueToSend = "CLNT|" + Command + " " + ArgsSend;
             SendMessage(valueToSend);
-            return WaitForResult(true);
+            return WaitForResult();
         }
 
         #endregion SendCommand
 
         #region SendMessage
 
-        public void SendMessage(string Value, bool UseEncryption = true, string Key = null)
+        public void SendMessage(string Value, bool UseEncryption = true)
         {
             //Sends the message to the client
             string stringToSend = Value.Replace(" ", "%20%");
             if (UseEncryption)
-            {
-                if (Key == null) { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetClientPrivateKey()); }
-                else { stringToSend = Encryption.Encrypt(stringToSend, Key); }
-            }
+            { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetServerPublicKey()); }
+
+            string Header = UseEncryption.ToString() + "%20%" + FingerPrint.Value() + "|";
+            stringToSend = Header + stringToSend;
+
             if (LogEvents) Console.WriteLine("Sending " + stringToSend);
             stringToSend += "<EOF>";
             byte[] BytesToSend = Encoding.UTF8.GetBytes(stringToSend);

@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using UniversalServer.Security;
+using UniversalServerAPI;
 
 namespace Moonbyte.UniversalServerAPI
 {
@@ -16,6 +17,7 @@ namespace Moonbyte.UniversalServerAPI
         public AsynchronousSocketListener serverSocket = null;
         public ServerRSA Encryption = new ServerRSA();
         public ClientSender clientSender;
+        public ClientTracker clientTracker = new ClientTracker();
 
         #endregion Network Objects
 

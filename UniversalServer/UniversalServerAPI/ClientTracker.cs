@@ -8,5 +8,18 @@ namespace UniversalServerAPI
 {
     public class ClientTracker
     {
+        #region Vars
+
+        private bool isLoggedIn = false;
+
+        #endregion Vars
+
+        #region Properties
+
+        public bool IsLoggedIn
+        { get { return this.isLoggedIn; }
+            set { isLoggedIn = value; } }
+
+        #endregion Properties
     }
 }

@@ -146,8 +146,29 @@ namespace Moonbyte.UniversalServer.TcpServer
                         workObject.sb = new StringBuilder();
                         workObject.buffer = new byte[ClientWorkObject.BufferSize];
 
-                        Console.WriteLine(content);
-                        CheckInternalCommands(content, workObject);
+                        content = content.Replace("<EOF>", "");
+                        content = content.Replace("%20%", " ");
+
+                        string[] contentArgs = content.Split('|');
+
+                        string Header = contentArgs[0];
+                        string[] HeaderArgs = Header.Split(' ');
+                        content = contentArgs[1];
+
+                        if (HeaderArgs[0] == true.ToString())
+                        { content = workObject.Encryption.Decrypt(content, workObject.Encryption.GetServerPrivateKey()); }
+
+                        Console.WriteLine("Header : " + Header);
+                        Console.WriteLine("content : " + content);
+
+                        if (!CheckInternalCommands(content, workObject))
+                        {
+                            if (workObject.clientTracker.IsLoggedIn)
+                            {
+
+                            }
+                            else { Send(workObject, "User isn't currently authorized to submit that command! Please login!"); }
+                        }
 
                         //Starts a new async receive on the client
                         workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
@@ -166,83 +187,17 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #endregion OnDataReceived
 
-        #region AcceptCallback
-
-        public void AcceptCallBack(IAsyncResult ar)
-        {
-            //Signal the mainthread to continue
-            allDone.Set();
-
-            //Get both sockets from the AsyncResult
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-
-            //Create the state object
-            ClientWorkObject state = new ClientWorkObject(handler, this);
-            handler.BeginReceive(state.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
-        }
-
-        #endregion AcceptCallback
-
-        #region ReadCallback
-
-        public void ReadCallback(IAsyncResult ar)
-        {
-            string content = String.Empty;
-
-            // Get the work object from the async result.
-            // Then gets the handler socket from the work object.
-            ClientWorkObject workObject = (ClientWorkObject)ar.AsyncState;
-            Socket handler = workObject.clientSocket;
-
-            try
-            {
-                // Read data from the client socket.
-                int bytesRead = handler.EndReceive(ar);
-
-                if (bytesRead > 0)
-                {
-                    //Download more data from the client
-                    workObject.sb.Append(Encoding.ASCII.GetString(workObject.buffer, 0, bytesRead));
-
-                    // Check for end-of-file tag, if its not there then it reads more data.
-                    content = workObject.sb.ToString();
-                    if (content.IndexOf("<EOF>") > -1)
-                    {
-                        Console.WriteLine(content);
-                        //Command Handler
-                        CheckInternalCommands(content, workObject);
-                        //UserLog
-                    }
-                    else
-                    {
-                        //Not all data received, get more
-                        workObject.buffer = new byte[ClientWorkObject.BufferSize];
-                        handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                ILogger.LogExceptions(e);
-                ILogger.AddToLog("INFO", "Client disconnected!");
-            }
-            finally
-            {
-                if (workObject != null && handler != null)
-                {
-                    workObject.buffer = new byte[ClientWorkObject.BufferSize];
-                    handler.BeginReceive(workObject.buffer, 0, ClientWorkObject.BufferSize, 0, new AsyncCallback(ReadCallback), workObject);
-                }
-            }
-        }
-
-        #endregion ReadCallback
-
         #region Send
 
-        public void Send(ClientWorkObject WorkObject, string Data)
+        public void Send(ClientWorkObject WorkObject, string Data, bool UseEncryption = true)
         {
+            string header = UseEncryption + "|";
+
+            ILogger.AddToLog("INFO", "Sending " + Data + " to ");
+            if (UseEncryption) { Data = WorkObject.Encryption.Encrypt(Data, WorkObject.Encryption.GetClientPublicKey()); }
+
+            Data = header + Data;
+
             WorkObject.clientSocket.Send(Encoding.ASCII.GetBytes(Data));
         }
 
@@ -254,13 +209,14 @@ namespace Moonbyte.UniversalServer.TcpServer
         {
             bool returnValue = false;
 
-            string[] headerSplit = RawCommand.Split('|');
-            if (headerSplit[0].ToUpper() == "KEY_SERVERPUBLIC")
-            { Send(workObject, workObject.Encryption.GetServerPublicKey()); }
-            if (headerSplit[0].ToUpper() == "KEY_CLIENTPUBLIC")
-            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString()); }
-            if (headerSplit[0].ToUpper() == "KEY_CLIENTPRIVATE")
-            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(headerSplit[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString()); }
+            string[] args = RawCommand.Split(' ');
+
+            if (args[0].ToUpper() == "KEY_SERVERPUBLIC")
+            { Send(workObject, workObject.Encryption.GetServerPublicKey(), false); returnValue = true; }
+            if (args[0].ToUpper() == "KEY_CLIENTPUBLIC")
+            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(args[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString(), false); returnValue = true; }
+            if (args[0].ToUpper() == "KEY_CLIENTPRIVATE")
+            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(args[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString(), false); returnValue = true; }
 
             return returnValue;
         }

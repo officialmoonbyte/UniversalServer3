@@ -21,7 +21,7 @@ namespace UniversalServer.Security
 
         #region Initialization
 
-        public ServerRSA(bool isServer = false)
+        public ServerRSA(bool isServer = true)
         {
             RSACryptoServiceProvider EncryptionServiceProvider = new RSACryptoServiceProvider(1024);
 
