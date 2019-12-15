@@ -63,9 +63,7 @@ namespace UniversalClient
             if (Client.Connected)
             {
                 SendMessage("Key_ServerPublic|", false, null);
-                receiveDone.WaitOne();
-                Receive(Client.Client);
-                this.Encryption.SetServerPublicKey(response);
+                this.Encryption.SetServerPublicKey(WaitForResult());
                 try
                 {
                     string encryptedClientPublicKey = Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey());

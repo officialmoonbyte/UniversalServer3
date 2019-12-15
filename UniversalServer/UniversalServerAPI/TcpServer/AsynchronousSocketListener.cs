@@ -243,14 +243,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         public void Send(ClientWorkObject WorkObject, string Data)
         {
-            // Gets the socket from the work object.
-            Socket handler = WorkObject.clientSocket;
-
-            // Convert the string data to byte data using ASCII encoding.
-            byte[] byteData = Encoding.ASCII.GetBytes(Data);
-
-            // Begin sending the data to the remote device.
-            handler.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), handler);
+            WorkObject.clientSocket.Send(Encoding.ASCII.GetBytes(Data));
         }
 
         #endregion Send
