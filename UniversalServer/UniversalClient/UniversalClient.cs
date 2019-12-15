@@ -1,10 +1,25 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using UniversalClient.Security;
 
 namespace UniversalClient
 {
+
+    // State object for receiving data from remote device.
+    public class StateObject
+    {
+        // Client socket.
+        public Socket workSocket = null;
+        // Size of receive buffer.
+        public const int BufferSize = 256;
+        // Receive buffer.
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.
+        public StringBuilder sb = new StringBuilder();
+    }
+
     public class Universalclient
     {
 
@@ -13,6 +28,11 @@ namespace UniversalClient
         private TcpClient Client;
         ClientRSA Encryption = new ClientRSA();
         public static bool LogEvents;
+
+        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
+
+        // The response from the remote device.
+        private static String response = String.Empty;
 
         public bool IsConnected
         {
@@ -43,7 +63,8 @@ namespace UniversalClient
             if (Client.Connected)
             {
                 SendMessage("Key_ServerPublic|", false, null);
-                this.Encryption.SetServerPublicKey(WaitForResult());
+                receiveDone.WaitOne();
+                this.Encryption.SetServerPublicKey(response);
                 try
                 {
                     string encryptedClientPublicKey = Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey());
@@ -62,6 +83,50 @@ namespace UniversalClient
         #endregion ConnectToRemoteServer
 
         #region WaitForResult
+
+        private static void Receive(Socket client)
+        {
+            try
+            {
+                StateObject state = new StateObject();
+                state.workSocket = client;
+
+                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+            } catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+        private static void ReceiveCallback(IAsyncResult ar)
+        {
+            try
+            {
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket client = state.workSocket;
+
+                int bytesRead = client.EndReceive(ar);
+
+                if (bytesRead > 0)
+                {
+                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                }
+                else
+                {
+                    if (state.sb.Length > 1)
+                    {
+                        response = state.sb.ToString();
+                    }
+                }
+
+                receiveDone.Set();
+            } catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
 
         public string WaitForResult(bool UseEncryption = false)
         {
