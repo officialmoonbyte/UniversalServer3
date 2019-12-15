@@ -123,7 +123,7 @@ namespace UniversalClient.Security
                 }
                 return stringBuilder.ToString();
             }
-            catch { return null; }
+            catch (Exception e) { Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace); return null; }
         }
 
         #endregion Encrypt

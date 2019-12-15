@@ -44,8 +44,18 @@ namespace UniversalClient
             {
                 SendMessage("Key_ServerPublic|", false, null);
                 this.Encryption.SetServerPublicKey(WaitForResult());
-                SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false);
-                SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false);
+                try
+                {
+                    string encryptedClientPublicKey = Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey());
+                    Console.WriteLine("YEET ::: " + encryptedClientPublicKey);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+                Console.WriteLine("Yah ::: " + Encryption.GetServerPublicKey());
+                //SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+                //SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
             }
         }
 
@@ -60,8 +70,8 @@ namespace UniversalClient
             string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
             if (LogEvents) Console.WriteLine("Server response: " + stringData);
             string Final = stringData.Replace("%20%", " ");
-            //if (UseEncryption)
-            //{ Final = Encryption.Decrypt(Final, Encryption.GetClientPrivateKey()); }
+            if (UseEncryption)
+            { Final = Encryption.Decrypt(Final, Encryption.GetClientPrivateKey()); }
             Console.WriteLine(Final);
             return Final;
         }
@@ -80,7 +90,7 @@ namespace UniversalClient
             if (LogEvents) Console.WriteLine("Args Send : " + ArgsSend);
             string valueToSend = "CLNT|" + Command + " " + ArgsSend;
             SendMessage(valueToSend);
-            return WaitForResult();
+            return WaitForResult(true);
         }
 
         #endregion SendCommand
@@ -91,13 +101,13 @@ namespace UniversalClient
         {
             //Sends the message to the client
             string stringToSend = Value.Replace(" ", "%20%");
-            stringToSend += "<EOF>";
-            //if (UseEncryption)
-            //{
-                //if (Key == null) { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetClientPrivateKey()); }
-                //else { stringToSend = Encryption.Encrypt(stringToSend, Key); }
-            //}
+            if (UseEncryption)
+            {
+                if (Key == null) { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetClientPrivateKey()); }
+                else { stringToSend = Encryption.Encrypt(stringToSend, Key); }
+            }
             if (LogEvents) Console.WriteLine("Sending " + stringToSend);
+            stringToSend += "<EOF>";
             byte[] BytesToSend = Encoding.UTF8.GetBytes(stringToSend);
             Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
         }

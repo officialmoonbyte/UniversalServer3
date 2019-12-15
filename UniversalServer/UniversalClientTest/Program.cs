@@ -12,7 +12,7 @@ namespace UniversalClientTest
         static void Main(string[] args)
         {
             Universalclient client = new Universalclient(true);
-            client.ConnectToRemoteServer("localhost", 7876);
+            client.ConnectToRemoteServer("192.168.0.2", 7876);
             client.SendCommand("testing", new string[] { "test", "123" });
             Console.Read();
         }
