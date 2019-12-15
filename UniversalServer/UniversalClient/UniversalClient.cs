@@ -64,6 +64,7 @@ namespace UniversalClient
             {
                 SendMessage("Key_ServerPublic|", false, null);
                 receiveDone.WaitOne();
+                Receive(Client.Client);
                 this.Encryption.SetServerPublicKey(response);
                 try
                 {
@@ -84,7 +85,7 @@ namespace UniversalClient
 
         #region WaitForResult
 
-        private static void Receive(Socket client)
+        public void Receive(Socket client)
         {
             try
             {
@@ -98,7 +99,7 @@ namespace UniversalClient
             }
         }
 
-        private static void ReceiveCallback(IAsyncResult ar)
+        public void ReceiveCallback(IAsyncResult ar)
         {
             try
             {
