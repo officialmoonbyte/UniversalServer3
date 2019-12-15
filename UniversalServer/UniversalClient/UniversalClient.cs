@@ -54,8 +54,8 @@ namespace UniversalClient
                     Console.WriteLine(e.StackTrace);
                 }
                 Console.WriteLine("Yah ::: " + Encryption.GetServerPublicKey());
-                //SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
-                //SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+                SendMessage("Key_ClientPublic|" + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
+                SendMessage("Key_ClientPrivate|" + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
             }
         }
 
@@ -74,6 +74,7 @@ namespace UniversalClient
             { Final = Encryption.Decrypt(Final, Encryption.GetClientPrivateKey()); }
             Console.WriteLine(Final);
             return Final;
+
         }
 
         #endregion WaitForResult
