@@ -17,7 +17,7 @@ namespace Moonbyte.UniversalServerAPI
         public AsynchronousSocketListener serverSocket = null;
         public ServerRSA Encryption = new ServerRSA();
         public ClientSender clientSender;
-        public ClientTracker clientTracker = new ClientTracker();
+        public ClientTracker clientTracker;
 
         #endregion Network Objects
 
@@ -38,6 +38,7 @@ namespace Moonbyte.UniversalServerAPI
             serverSocket = ServerObject;
 
             clientSender = new ClientSender(this);
+            clientTracker = new ClientTracker(serverSocket.ServerName);
             clientTimeoutTimer = new ClientTimeout(this);
         }
 
@@ -61,6 +62,7 @@ namespace Moonbyte.UniversalServerAPI
 
         public void Dispose()
         {
+            clientTracker.LogDisconnect();
             clientSocket.Shutdown(SocketShutdown.Both);
             clientSocket.Close();
 

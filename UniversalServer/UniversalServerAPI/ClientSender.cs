@@ -20,8 +20,8 @@ namespace Moonbyte.UniversalServerAPI
         #endregion Initialization
 
         #region Send
-        public void Send(ClientWorkObject WorkObject, string Data)
-        { WorkObject.serverSocket.Send(WorkObject, Data); }
+        public bool Send(ClientWorkObject WorkObject, string Data)
+        { WorkObject.serverSocket.Send(WorkObject, Data); return true; }
 
         #endregion Send
     }

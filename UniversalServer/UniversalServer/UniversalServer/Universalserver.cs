@@ -30,7 +30,6 @@ namespace UniversalServer
         {
             foreach(string directory in Directory.GetDirectories(ServerDirectories))
             {
-                Console.WriteLine(directory);
                 string serverName = new DirectoryInfo(directory).Name;
                 AsynchronousSocketListener socketListener = new AsynchronousSocketListener(serverName, Path.Combine(ServerDirectories, serverName));
                 TcpServers.Add(socketListener);
@@ -51,7 +50,7 @@ namespace UniversalServer
         public static void InitializeUniversalServer()
         {
             //Initialize Server Directories
-            ServerDirectories = Environment.CurrentDirectory + @"\Servers\";
+            ServerDirectories = Path.Combine(Environment.CurrentDirectory, "Servers");
 
             //Checks if the directories exist
             if (!Directory.Exists(ServerDirectories)) Directory.CreateDirectory(ServerDirectories);
