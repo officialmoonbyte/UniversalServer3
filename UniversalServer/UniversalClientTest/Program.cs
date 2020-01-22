@@ -13,7 +13,12 @@ namespace UniversalClientTest
         {
             Universalclient client = new Universalclient(true);
             client.ConnectToRemoteServer("192.168.0.2", 7876);
-            client.SendCommand("testing", new string[] { "test", "123" });
+            client.SendCommand("testplugin", new string[] { "testing"});
+            client.SendCommand("testplugin", new string[] { "foo" });
+            client.SendCommand("testplugin", new string[] { "bar" });
+            client.SendCommand("thisisaninvalidplugin", new string[] { "testplugin" });
+            client.SendCommand("testplugin", new string[] { "thisisaninvalidcommand" });
+
             Console.Read();
         }
     }

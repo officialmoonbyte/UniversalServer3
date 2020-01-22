@@ -79,8 +79,12 @@ namespace UniversalClient
                 SendMessage("Key_ClientPrivate " + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
 
                 //Sends in the user data now, gets the user data encrypted first
-                string UserID = FingerPrint.Value();
-                SendMessage("User SetID " + UserID); WaitForResult();
+                SendMessage("User SetID "); string loginCheck = WaitForResult();
+                if (loginCheck.ToUpper() != "TRUE")
+                {
+                    Console.WriteLine("Failed to authorize user connection! Closing and disposing client object.");
+                    this.Disconnect(); this.Dispose();
+                }
             }
         }
 
@@ -157,11 +161,11 @@ namespace UniversalClient
         {
             for (int i = 0; i < args.Length; i++)
             {
-                args[i] = args[i].Replace(" ", "%40%");
+                args[i] = args[i].Replace(" ", "%20%");
             }
             string ArgsSend = string.Join(" ", args);
             if (LogEvents) Console.WriteLine("Args Send : " + ArgsSend);
-            string valueToSend = "CLNT|" + Command + " " + ArgsSend;
+            string valueToSend = Command + " " + ArgsSend;
             SendMessage(valueToSend);
             return WaitForResult();
         }
@@ -212,5 +216,14 @@ namespace UniversalClient
         }
 
         #endregion Disconnect
+
+        #region Dispose
+
+        public void Dispose()
+        {
+
+        }
+
+        #endregion Dispose
     }
 }
