@@ -1,4 +1,6 @@
-﻿using Moonbyte.UniversalServer.TcpServer;
+﻿using Moonbyte.Logging;
+using Moonbyte.UniversalServer.TcpServer;
+using System;
 using System.Net.Sockets;
 using System.Text;
 using UniversalServer.Security;
@@ -51,6 +53,19 @@ namespace Moonbyte.UniversalServerAPI
         public byte[] buffer = new byte[BufferSize];
 
         #endregion Buffer 
+
+        #region ILogger
+
+        public void AddToLog(string Header, string Value) 
+        { ILogger.AddToLog(Header, Value); }
+
+        public void AddWhitespace()
+        { ILogger.AddWhitespace(); }
+
+        public void LogExceptions(Exception e)
+        { ILogger.LogExceptions(e); }
+
+        #endregion ILogger
 
         #region Other
 
