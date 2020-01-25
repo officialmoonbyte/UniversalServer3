@@ -21,11 +21,12 @@ namespace Moonbyte.UniversalServer.TcpServer
         List<IUniversalPlugin> ServerPlugins = new List<IUniversalPlugin>();
 
         public string ServerName;
+        public Logger serverPluginLogger = new Logger();
         public int Port;
         private MSMCore ServerSettings = new MSMCore();
         public ManualResetEvent allDone = new ManualResetEvent(false);
         public int Clients = 0;
-        bool isListening = false;
+        bool PluginsLoaded = false;
         Socket Serverlistener = null;
 
         #endregion Vars
@@ -100,13 +101,6 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #endregion GetPluginDirectory
 
-        #region IsListening
-
-        public bool IsListening()
-        { return isListening; }
-
-        #endregion IsListening
-
         #region StartListening
 
         public void StartListening()
@@ -116,6 +110,7 @@ namespace Moonbyte.UniversalServer.TcpServer
             this.Port = ServerPort;
 
             ServerPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
+            PluginsLoaded = true;
 
             Serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
@@ -195,6 +190,7 @@ namespace Moonbyte.UniversalServer.TcpServer
                                     {
                                         if (_serverPlugin.Invoke(workObject, commandArgs) == false) { Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; }
                                         else { ClientSentData = true; }
+                                        break;
                                     }
                                 } if (ClientSentData == false) { Send(workObject, "USER_INVALIDPLUGIN"); }
                             }
@@ -233,6 +229,37 @@ namespace Moonbyte.UniversalServer.TcpServer
         }
 
         #endregion Send
+
+        #region ConsoleInvoke
+
+        public void ConsolePluginInvoke(string[] args)
+        {
+            bool found = false; if (PluginsLoaded)
+            {
+                foreach (IUniversalPlugin plugin in ServerPlugins)
+                { 
+                    if (args[0].ToUpper() == plugin.Name.ToUpper()) 
+                    {
+                        found = true;
+                        try
+                        {
+                            plugin.ConsoleInvoke(args, serverPluginLogger);
+                        }
+                        catch (Exception e)
+                        {
+                            ILogger.AddToLog("WARN", "Exception occured while executing a Console Plugin Command!");
+                            ILogger.LogExceptions(e);
+                        }
+                        break; 
+                    } 
+                }
+            }
+            else { ILogger.AddToLog("INFO", "Plugins hasn't been loaded in the appdomain yet! Please load them by starting the server."); }
+            
+            if (!found) { ILogger.AddToLog("INFO", "Couldn't find plugin [" + args[0] + "] please make sure that plugin is installed and loaded! "); }
+        }
+
+        #endregion ConsoleInvoke
 
         #region InternalServerCommands
 

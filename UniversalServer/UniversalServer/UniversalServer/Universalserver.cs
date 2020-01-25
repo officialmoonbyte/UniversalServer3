@@ -4,6 +4,7 @@ using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UniversalServer.Commandline;
 
 namespace UniversalServer
@@ -89,6 +90,13 @@ namespace UniversalServer
                 //StopServer, Dispose, Stop, StopServers
                 if (Command == "STOPSERVER" || Command=="STOPSERVERS" || Command == "DISPOSE" || Command == "STOP")
                 { ConsoleCommands.StopServer(Args[1]); }
+                if (Command == "INVOKE" || Command == "INVOKECOMMAND" || Command == "INVOKECONSOLECOMMAND")
+                {
+                    List<string> tempArray = new List<string>(Args);
+                    tempArray.RemoveAt(0); tempArray.RemoveAt(0);
+
+                    ConsoleCommands.InvokeConsoleCommand(Args[1], tempArray.ToArray());
+                }
             }
             catch (Exception e)
             { ILogger.LogExceptions(e); }

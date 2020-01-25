@@ -13,6 +13,15 @@ namespace TestPlugin
 
         #endregion Vars
 
+        #region ConsoleInvoke
+
+        public void ConsoleInvoke(string[] commandArgs, Logger iLogger)
+        {
+            iLogger.AddToLog("INFO", "This is a test!!");
+        }
+
+        #endregion ConsoleInvoke
+
         #region Initialize Plugin
 
         public bool Initialize(string PluginDataDirectory)

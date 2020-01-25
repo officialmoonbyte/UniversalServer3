@@ -18,7 +18,7 @@ namespace UniversalServer.Commandline
         public static void ListServer()
         {
             foreach(AsynchronousSocketListener socketListener in Universalserver.TcpServers)
-            { ILogger.AddToLog("INFO", socketListener.ServerName + " : " + "Online : " + socketListener.IsListening() + ", Clients Connected : " + socketListener.Clients); }
+            { ILogger.AddToLog("INFO", socketListener.ServerName + " : " + "Online : " + ", Clients Connected : " + socketListener.Clients); }
 
             ILogger.AddWhitespace();
         }
@@ -28,9 +28,22 @@ namespace UniversalServer.Commandline
             bool found = false; foreach(AsynchronousSocketListener listener in Universalserver.TcpServers)
             {
                 if (listener.ServerName == ServerName)
-                { listener.StartListening(); ILogger.AddToLog("INFO", ServerName + " has started listening on port " + listener.Port); found = true; }
+                { listener.StartListening(); ILogger.AddToLog("INFO", ServerName + " has started listening on port " + listener.Port); found = true; break; }
             }
             if (!found) { ILogger.AddToLog("INFO", "Couldn't find server with the title '" + ServerName + "'"); }
+        }
+
+        public static void InvokeConsoleCommand(string ServerName, string[] Args)
+        {
+            bool found = false; foreach(AsynchronousSocketListener listener in Universalserver.TcpServers)
+            {
+                if (listener.ServerName == ServerName)
+                { found = true;
+
+                    listener.ConsolePluginInvoke(Args);
+
+                break; }
+            } if (!found) { ILogger.AddToLog("INFO", "Couldn't find server with the title '" + ServerName + "'"); }
         }
 
         public static void StopServer(string ServerName)

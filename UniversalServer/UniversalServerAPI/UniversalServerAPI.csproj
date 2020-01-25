@@ -31,11 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GFS, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GlobalSettingsFramework.1.3.0\lib\net45\GFS.dll</HintPath>
-    </Reference>
-    <Reference Include="MoonbyteSettingsManager, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSM.2.0.0\lib\net45\MoonbyteSettingsManager.dll</HintPath>
+    <Reference Include="MoonbyteSettingsManager, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSM.2.0.1\lib\net45\MoonbyteSettingsManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,6 +48,7 @@
     <Compile Include="ClientTimeoutTimer.cs" />
     <Compile Include="ClientTracker.cs" />
     <Compile Include="ClientWorkObject.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="Interface\IUniversalPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\ServerRSA.cs" />
@@ -60,7 +58,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ILogger\ILogger.csproj">
       <Project>{8c6a9e89-f2c4-4f29-ad6f-aca2d3793b35}</Project>
