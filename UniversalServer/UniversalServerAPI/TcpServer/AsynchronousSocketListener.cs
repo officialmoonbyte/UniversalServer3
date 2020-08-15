@@ -66,6 +66,7 @@ namespace Moonbyte.UniversalServer.TcpServer
             }
             catch { }
 
+            ServerSettings.ShowLog = false;
             ServerSettings.SettingsDirectory = ServerDirectory;
         }
 

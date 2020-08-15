@@ -57,6 +57,7 @@ namespace UniversalServer
             if (!Directory.Exists(ServerDirectories)) Directory.CreateDirectory(ServerDirectories);
 
             //Initializes SettingsManager
+            SettingsManager.ShowLog = false;
             SettingsManager.SettingsDirectory = Environment.CurrentDirectory;
 
             //Initialize Components
