@@ -50,6 +50,9 @@
     <Compile Include="ClientWorkObject.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="Interface\IUniversalPlugin.cs" />
+    <Compile Include="Plugin\IUniversalPlugin.cs" />
+    <Compile Include="Plugin\module\ILogger.cs" />
+    <Compile Include="Plugin\UniversalPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\ServerRSA.cs" />
     <Compile Include="TcpServer\AsynchronousSocketListener.cs" />
@@ -64,8 +67,6 @@
       <Name>ILogger</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Plugin\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

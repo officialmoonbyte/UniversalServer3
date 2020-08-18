@@ -1,5 +1,5 @@
 ﻿using Moonbyte.UniversalServerAPI;
-using Moonbyte.UniversalServerAPI.Interface;
+using Moonbyte.UniversalServerAPI.Plugin;
 using System.IO;
 
 namespace TestPlugin
@@ -13,24 +13,7 @@ namespace TestPlugin
 
         #endregion Vars
 
-        #region ConsoleInvoke
-
-        public void ConsoleInvoke(string[] commandArgs, Logger iLogger)
-        {
-            iLogger.AddToLog("INFO", "This is a test!!");
-        }
-
-        #endregion ConsoleInvoke
-
-        #region Initialize Plugin
-
-        public bool Initialize(string PluginDataDirectory)
-        {
-            if (!Directory.Exists(PluginDataDirectory)) Directory.CreateDirectory(PluginDataDirectory);
-            return true;
-        }
-
-        #endregion Initialize Plugin
+        #region Basic area
 
         #region Invoke
 
@@ -47,6 +30,38 @@ namespace TestPlugin
         }
 
         #endregion Invoke
+
+        #region ConsoleInvoke
+
+        public void ConsoleInvoke(string[] commandArgs, Logger iLogger)
+        {
+
+        }
+
+        #endregion ConsoleInvoke
+
+        #region Initialize Plugin
+
+        public bool Initialize(string PluginDataDirectory, UniversalPlugin BaseClass)
+        {
+            if (!Directory.Exists(PluginDataDirectory)) Directory.CreateDirectory(PluginDataDirectory);
+            return true;
+        }
+
+        #endregion Initialize Plugin
+
+        #endregion Basic Area
+
+        #region UniversalServerAPI
+
+        UniversalPlugin ServerAPI;
+        public UniversalPlugin GetUniversalPluginAPI()
+        { return ServerAPI; }
+
+        public void SetUniversalPluginAPI(UniversalPlugin Plugin)
+        { ServerAPI = Plugin; }
+
+        #endregion UniversalServerAPI
 
     }
 }

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalClientTest", "Univ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlugin", "TestPlugin\TestPlugin.csproj", "{4051D914-CA74-49AB-AF0E-86CDE3DFCF26}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{31F112C4-4835-4A2B-8F75-0AE87D570941}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A6D32F4E-4603-4E0D-806B-CF467FF96AE8} = {31F112C4-4835-4A2B-8F75-0AE87D570941}
+		{4051D914-CA74-49AB-AF0E-86CDE3DFCF26} = {31F112C4-4835-4A2B-8F75-0AE87D570941}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93555421-001B-4CC7-AD4A-1743444498AC}

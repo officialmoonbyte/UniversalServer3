@@ -27,7 +27,6 @@ namespace Moonbyte.UniversalServerAPI
 
         ClientTimeout clientTimeoutTimer;
 
-
         #endregion Tracking Objects
 
         #endregion Vars
@@ -53,19 +52,6 @@ namespace Moonbyte.UniversalServerAPI
         public byte[] buffer = new byte[BufferSize];
 
         #endregion Buffer 
-
-        #region ILogger
-
-        public void AddToLog(string Header, string Value) 
-        { ILogger.AddToLog(Header, Value); }
-
-        public void AddWhitespace()
-        { ILogger.AddWhitespace(); }
-
-        public void LogExceptions(Exception e)
-        { ILogger.LogExceptions(e); }
-
-        #endregion ILogger
 
         #region Other
 
