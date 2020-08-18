@@ -4,6 +4,7 @@ post credited, instead of just taking the work. */
 
 using Moonbyte.Logging;
 using Moonbyte.UniversalServerAPI.Interface;
+using Moonbyte.UniversalServerAPI.Plugin;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,15 +18,15 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Vars
 
-        List<IUniversalPlugin> returnPlugins = new List<IUniversalPlugin>();
+        List<UniversalPlugin> returnPlugins = new List<UniversalPlugin>();
 
         #endregion Vars
 
         #region LoadPlugins
 
-        public List<IUniversalPlugin> LoadPlugins(string PluginDirectory)
+        public List<UniversalPlugin> LoadPlugins(string PluginDirectory)
         {
-            returnPlugins = new List<IUniversalPlugin>();
+            returnPlugins = new List<UniversalPlugin>();
             string pluginDataDirectory = Path.Combine(PluginDirectory, "Data");
 
             ILogger.AddWhitespace();
@@ -42,17 +43,17 @@ namespace Moonbyte.UniversalServer.TcpServer
                 }
             } else { Directory.CreateDirectory(PluginDirectory); }
 
-            Type interfaceType = typeof(IUniversalPlugin);
+            Type interfaceType = typeof(UniversalPlugin);
             Type[] types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => interfaceType.IsAssignableFrom(p) && p.IsClass).ToArray();
             foreach (Type type in types)
             {
-                IUniversalPlugin plugin = (IUniversalPlugin)Activator.CreateInstance(type);
+                UniversalPlugin plugin = (UniversalPlugin)Activator.CreateInstance(type);
 
-                ILogger.AddToLog("INFO", "Initializing [" + plugin.Name + "]");
-                plugin.Initialize(Path.Combine(pluginDataDirectory, plugin.Name));
+                ILogger.AddToLog("INFO", "Initializing [" + plugin.core.Name + "]");
+                plugin.core.Initialize(Path.Combine(pluginDataDirectory, plugin.core.Name), plugin);
 
                 returnPlugins.Add(plugin);
-                ILogger.AddToLog("INFO", "Plugin [" + plugin.Name + "] Fully loaded!");
+                ILogger.AddToLog("INFO", "Plugin [" + plugin.core.Name + "] Fully loaded!");
             }
 
             ILogger.AddWhitespace();

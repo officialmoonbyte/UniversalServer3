@@ -1,6 +1,7 @@
 ﻿using Moonbyte.Logging;
 using Moonbyte.UniversalServerAPI;
 using Moonbyte.UniversalServerAPI.Interface;
+using Moonbyte.UniversalServerAPI.Plugin;
 using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         #region Vars
 
         IPluginLoader pluginLoader = new IPluginLoader();
-        List<IUniversalPlugin> ServerPlugins = new List<IUniversalPlugin>();
+        List<UniversalPlugin> ServerPlugins = new List<UniversalPlugin>();
 
         public string ServerName;
         public Logger serverPluginLogger = new Logger();
@@ -185,11 +186,11 @@ namespace Moonbyte.UniversalServer.TcpServer
                             else if (workObject.clientTracker.IsLoggedIn)
                             {
                                 bool ClientSentData = false;
-                                foreach (IUniversalPlugin _serverPlugin in ServerPlugins)
+                                foreach (UniversalPlugin _serverPlugin in ServerPlugins)
                                 {
-                                    if (commandArgs[0].ToUpper() == _serverPlugin.Name.ToUpper())
+                                    if (commandArgs[0].ToUpper() == _serverPlugin.core.Name.ToUpper())
                                     {
-                                        if (_serverPlugin.Invoke(workObject, commandArgs) == false) { Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; }
+                                        if (_serverPlugin.core.Invoke(workObject, commandArgs) == false) { Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; }
                                         else { ClientSentData = true; }
                                         break;
                                     }
@@ -237,14 +238,14 @@ namespace Moonbyte.UniversalServer.TcpServer
         {
             bool found = false; if (PluginsLoaded)
             {
-                foreach (IUniversalPlugin plugin in ServerPlugins)
+                foreach (UniversalPlugin plugin in ServerPlugins)
                 { 
-                    if (args[0].ToUpper() == plugin.Name.ToUpper()) 
+                    if (args[0].ToUpper() == plugin.core.Name.ToUpper()) 
                     {
                         found = true;
                         try
                         {
-                            plugin.ConsoleInvoke(args, serverPluginLogger);
+                            plugin.core.ConsoleInvoke(args, serverPluginLogger);
                         }
                         catch (Exception e)
                         {

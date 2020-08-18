@@ -51,6 +51,7 @@
     <Compile Include="ILogger.cs" />
     <Compile Include="Interface\IUniversalPlugin.cs" />
     <Compile Include="Plugin\IUniversalPlugin.cs" />
+    <Compile Include="Plugin\module\EventManager.cs" />
     <Compile Include="Plugin\module\ILogger.cs" />
     <Compile Include="Plugin\UniversalPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
