@@ -1,7 +1,8 @@
 ﻿using Moonbyte.Logging;
 using Moonbyte.UniversalServerAPI;
-using Moonbyte.UniversalServerAPI.Interface;
 using Moonbyte.UniversalServerAPI.Plugin;
+using Moonbyte.UniversalServerAPI.TcpServer;
+using Moonbyte.UniversalServerAPI.TcpServer.Events;
 using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
@@ -18,17 +19,19 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Vars
 
-        IPluginLoader pluginLoader = new IPluginLoader();
         List<UniversalPlugin> ServerPlugins = new List<UniversalPlugin>();
+
+        private EventTracker eventTracker;
+        IPluginLoader pluginLoader = new IPluginLoader();
+        private MSMCore serverSettings = new MSMCore();
+        bool pluginsLoaded = false;
+        Socket serverlistener = null;
 
         public string ServerName;
         public Logger serverPluginLogger = new Logger();
         public int Port;
-        private MSMCore ServerSettings = new MSMCore();
         public ManualResetEvent allDone = new ManualResetEvent(false);
         public int Clients = 0;
-        bool PluginsLoaded = false;
-        Socket Serverlistener = null;
 
         #endregion Vars
 
@@ -44,9 +47,9 @@ namespace Moonbyte.UniversalServer.TcpServer
         private int GetServerPort()
         {
             string settingTitle = "ServerPort"; int defaultValue = 7876;
-            if (ServerSettings.CheckSetting(settingTitle))
-            { return int.Parse(ServerSettings.ReadSetting(settingTitle)); }
-            else { ServerSettings.EditSetting(settingTitle, defaultValue.ToString()); return defaultValue; }
+            if (serverSettings.CheckSetting(settingTitle))
+            { return int.Parse(serverSettings.ReadSetting(settingTitle)); }
+            else { serverSettings.EditSetting(settingTitle, defaultValue.ToString()); return defaultValue; }
         }
 
         #endregion Settings
@@ -56,6 +59,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         public AsynchronousSocketListener(string serverName, string ServerDirectory)
         {
             ServerName = serverName;
+            eventTracker = new EventTracker(this);
             ServerDirectory = Path.Combine(Environment.CurrentDirectory, "Servers", ServerName);
             PluginDirectory = Path.Combine(ServerDirectory, "Plugins");;
 
@@ -67,8 +71,8 @@ namespace Moonbyte.UniversalServer.TcpServer
             }
             catch { }
 
-            ServerSettings.ShowLog = false;
-            ServerSettings.SettingsDirectory = ServerDirectory;
+            serverSettings.ShowLog = false;
+            serverSettings.SettingsDirectory = ServerDirectory;
         }
 
         #endregion
@@ -112,12 +116,12 @@ namespace Moonbyte.UniversalServer.TcpServer
             this.Port = ServerPort;
 
             ServerPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
-            PluginsLoaded = true;
+            pluginsLoaded = true;
 
-            Serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
-            Serverlistener.Listen(200);
-            Serverlistener.BeginAccept(OnSocketAccepted, null);
+            serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
+            serverlistener.Listen(200);
+            serverlistener.BeginAccept(OnSocketAccepted, null);
         }
 
         #endregion StartListening
@@ -127,13 +131,13 @@ namespace Moonbyte.UniversalServer.TcpServer
         private void OnSocketAccepted(IAsyncResult result)
         {
             // This is the client socket, where you send/receive data from after accepting. Keep it in a List<Socket> collection if you need to.
-            Socket client = Serverlistener.EndAccept(result);
+            Socket client = serverlistener.EndAccept(result);
 
             ILogger.AddToLog("INFO", "Accepted client endpoint [" + client.RemoteEndPoint + "]");
 
             ClientWorkObject workObject = new ClientWorkObject(client, this);
             client.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
-            Serverlistener.BeginAccept(OnSocketAccepted, null);
+            serverlistener.BeginAccept(OnSocketAccepted, null);
         }
 
         #endregion OnSocketAccepted
@@ -185,16 +189,33 @@ namespace Moonbyte.UniversalServer.TcpServer
                             }
                             else if (workObject.clientTracker.IsLoggedIn)
                             {
-                                bool ClientSentData = false;
-                                foreach (UniversalPlugin _serverPlugin in ServerPlugins)
+                                OnBeforeClientRequestEventArgs onBeforeRequest = new OnBeforeClientRequestEventArgs { RawData = content, Client = workObject };
+                                eventTracker.OnBeforeClientRequest(this, onBeforeRequest);
+
+                                if (onBeforeRequest.CancelRequest == ServerAPI.moonbyteCancelRequest.Continue)
                                 {
-                                    if (commandArgs[0].ToUpper() == _serverPlugin.core.Name.ToUpper())
+                                    bool ClientSentData = false;
+                                    foreach (UniversalPlugin _serverPlugin in ServerPlugins)
                                     {
-                                        if (_serverPlugin.core.Invoke(workObject, commandArgs) == false) { Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; }
-                                        else { ClientSentData = true; }
-                                        break;
+                                        if (commandArgs[0].ToUpper() == _serverPlugin.core.Name.ToUpper())
+                                        {
+                                            if (_serverPlugin.core.Invoke(workObject, commandArgs) == false) 
+                                            { 
+                                                Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; 
+                                            }
+                                            else 
+                                            {
+                                                ClientSentData = true; 
+                                            }
+                                            break;
+                                        }
                                     }
-                                } if (ClientSentData == false) { Send(workObject, "USER_INVALIDPLUGIN"); }
+                                    if (ClientSentData == false) { Send(workObject, "USER_INVALIDPLUGIN"); }
+                                }
+                                else
+                                {
+                                    Send(workObject, onBeforeRequest.ErrorMessage);
+                                }
                             }
                             else { Send(workObject, "USER_AUTHERROR"); }
                         }
@@ -217,6 +238,15 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #endregion OnDataReceived
 
+        #region GetLoadedPlugins
+
+        public List<UniversalPlugin> GetLoadedPlugins() 
+        { 
+            return ServerPlugins; 
+        }
+
+        #endregion GetLoadedPlugins
+
         #region Send
 
         public void Send(ClientWorkObject WorkObject, string Data, bool UseEncryption = true)
@@ -236,7 +266,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         public void ConsolePluginInvoke(string[] args)
         {
-            bool found = false; if (PluginsLoaded)
+            bool found = false; if (pluginsLoaded)
             {
                 foreach (UniversalPlugin plugin in ServerPlugins)
                 { 

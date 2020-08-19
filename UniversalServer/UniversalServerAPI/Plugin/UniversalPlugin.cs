@@ -18,7 +18,7 @@ namespace Moonbyte.UniversalServerAPI.Plugin
         #region Modules
 
         public ILogger Log = new ILogger();
-        public EventManager eventManager = new EventManager();
+        public PluginEventManager EventManager = new PluginEventManager();
 
         #endregion Modules
 
