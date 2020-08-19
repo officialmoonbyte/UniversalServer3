@@ -27,12 +27,16 @@ namespace Moonbyte.UniversalServer.TcpServer
         private MSMCore serverSettings = new MSMCore();
         bool pluginsLoaded = false;
         Socket serverlistener = null;
+        AsynchronousWebSocketListener webServer;
 
         public string ServerName;
         public Logger serverPluginLogger = new Logger();
         public int Port;
         public ManualResetEvent allDone = new ManualResetEvent(false);
         public int Clients = 0;
+        bool PluginsLoaded = false;
+        bool _WebServer = true;
+        Socket Serverlistener = null;
 
         #endregion Vars
 
@@ -57,8 +61,9 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Initialization
 
-        public AsynchronousSocketListener(string serverName, string ServerDirectory)
+        public AsynchronousSocketListener(string serverName, string ServerDirectory, bool WebServer = true)
         {
+            _WebServer = WebServer;
             ServerName = serverName;
             eventTracker = new EventTracker(this);
             ServerDirectory = Path.Combine(Environment.CurrentDirectory, "Servers", ServerName);
@@ -116,8 +121,11 @@ namespace Moonbyte.UniversalServer.TcpServer
             int ServerPort = this.GetServerPort();
             this.Port = ServerPort;
 
-            serverPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
-            pluginsLoaded = true;
+            if (_WebServer)
+            { webServer = new AsynchronousWebSocketListener(IPAddress.Any.ToString(), Port + 1); }
+
+            ServerPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
+            PluginsLoaded = true;
 
             serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
