@@ -124,7 +124,7 @@ namespace Moonbyte.UniversalServer.TcpServer
             if (_WebServer)
             { webServer = new AsynchronousWebSocketListener(IPAddress.Any.ToString(), Port + 1); }
 
-            ServerPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
+            serverPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
             PluginsLoaded = true;
 
             serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
