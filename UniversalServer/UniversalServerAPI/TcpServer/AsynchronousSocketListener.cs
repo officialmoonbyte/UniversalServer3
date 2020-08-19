@@ -7,6 +7,7 @@ using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -19,7 +20,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #region Vars
 
-        List<UniversalPlugin> ServerPlugins = new List<UniversalPlugin>();
+        List<UniversalPlugin> serverPlugins = new List<UniversalPlugin>();
 
         private EventTracker eventTracker;
         IPluginLoader pluginLoader = new IPluginLoader();
@@ -115,7 +116,7 @@ namespace Moonbyte.UniversalServer.TcpServer
             int ServerPort = this.GetServerPort();
             this.Port = ServerPort;
 
-            ServerPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
+            serverPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
             pluginsLoaded = true;
 
             serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -191,26 +192,14 @@ namespace Moonbyte.UniversalServer.TcpServer
                             {
                                 OnBeforeClientRequestEventArgs onBeforeRequest = new OnBeforeClientRequestEventArgs { RawData = content, Client = workObject };
                                 eventTracker.OnBeforeClientRequest(this, onBeforeRequest);
+                                UniversalPlugin requestedPlugin = getPlugin(commandArgs[0]);
 
                                 if (onBeforeRequest.CancelRequest == ServerAPI.moonbyteCancelRequest.Continue)
                                 {
-                                    bool ClientSentData = false;
-                                    foreach (UniversalPlugin _serverPlugin in ServerPlugins)
+                                    if (requestedPlugin.core.Invoke(workObject, commandArgs) == false)
                                     {
-                                        if (commandArgs[0].ToUpper() == _serverPlugin.core.Name.ToUpper())
-                                        {
-                                            if (_serverPlugin.core.Invoke(workObject, commandArgs) == false) 
-                                            { 
-                                                Send(workObject, "USER_INVALIDPLUGINCOMMAND"); ClientSentData = true; 
-                                            }
-                                            else 
-                                            {
-                                                ClientSentData = true; 
-                                            }
-                                            break;
-                                        }
+                                        Send(workObject, "USER_INVALIDPLUGINCOMMAND");
                                     }
-                                    if (ClientSentData == false) { Send(workObject, "USER_INVALIDPLUGIN"); }
                                 }
                                 else
                                 {
@@ -238,11 +227,20 @@ namespace Moonbyte.UniversalServer.TcpServer
 
         #endregion OnDataReceived
 
+        #region GetPlugin
+
+        public UniversalPlugin getPlugin(string PluginName)
+        {
+            return serverPlugins.FirstOrDefault(s => s.core.Name == PluginName);
+        }
+
+        #endregion GetPlugin
+
         #region GetLoadedPlugins
 
         public List<UniversalPlugin> GetLoadedPlugins() 
         { 
-            return ServerPlugins; 
+            return serverPlugins; 
         }
 
         #endregion GetLoadedPlugins
@@ -268,7 +266,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         {
             bool found = false; if (pluginsLoaded)
             {
-                foreach (UniversalPlugin plugin in ServerPlugins)
+                foreach (UniversalPlugin plugin in serverPlugins)
                 { 
                     if (args[0].ToUpper() == plugin.core.Name.ToUpper()) 
                     {
