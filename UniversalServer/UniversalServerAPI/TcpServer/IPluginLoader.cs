@@ -48,8 +48,8 @@ namespace Moonbyte.UniversalServer.TcpServer
             foreach (Type type in types)
             {
                 UniversalPlugin plugin = (UniversalPlugin)Activator.CreateInstance(type);
-
                 ILogger.AddToLog("INFO", "Initializing [" + plugin.core.Name + "]");
+                plugin.core.SetUniversalPluginAPI(plugin);
                 plugin.core.Initialize(Path.Combine(pluginDataDirectory, plugin.core.Name), plugin);
 
                 returnPlugins.Add(plugin);
