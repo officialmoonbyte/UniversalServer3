@@ -1,12 +1,10 @@
-﻿using Moonbyte.Logging;
-using Moonbyte.UniversalServer.TcpServer;
-using System;
+﻿using Moonbyte.UniversalServer.TcpServer;
 using System.Net.Sockets;
 using System.Text;
 using UniversalServer.Security;
-using UniversalServerAPI;
+using UniversalServerAPI.Client;
 
-namespace Moonbyte.UniversalServerAPI
+namespace Moonbyte.UniversalServerAPI.Client
 {
     public class ClientWorkObject
     {

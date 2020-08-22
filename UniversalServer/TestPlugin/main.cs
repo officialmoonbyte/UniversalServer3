@@ -1,4 +1,5 @@
 ﻿using Moonbyte.UniversalServerAPI;
+using Moonbyte.UniversalServerAPI.Client;
 using Moonbyte.UniversalServerAPI.Plugin;
 using System.IO;
 

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UniversalClient;
+using Moonbyte.Networking;
 
 namespace UniversalClientTest
 {
@@ -11,7 +7,7 @@ namespace UniversalClientTest
     {
         static void Main(string[] args)
         {
-            Universalclient client = new Universalclient(true);
+            UniversalClient client = new UniversalClient(true);
             client.ConnectToRemoteServer("192.168.0.16", 7876);
 
             client.SendCommand("userdatabase", new string[] { "editvalue", "moonbyte", "tempProfile", "VermeerVersion", "1.0.0"});

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Moonbyte.UniversalServerAPI
+namespace Moonbyte.UniversalServerAPI.Client
 {
     public class ClientTimeout
     {

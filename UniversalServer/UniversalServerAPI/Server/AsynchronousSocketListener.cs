@@ -1,8 +1,8 @@
 ﻿using Moonbyte.Logging;
 using Moonbyte.UniversalServerAPI;
+using Moonbyte.UniversalServerAPI.Client;
 using Moonbyte.UniversalServerAPI.Plugin;
 using Moonbyte.UniversalServerAPI.TcpServer;
-using Moonbyte.UniversalServerAPI.TcpServer.Events;
 using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
@@ -174,51 +174,9 @@ namespace Moonbyte.UniversalServer.TcpServer
                         workObject.buffer = new byte[ClientWorkObject.BufferSize];
 
                         content = content.Replace("<EOF>", "");
-                        content = content.Replace("%20%", " ");
 
-                        string[] contentArgs = content.Split('|');
+                        string[] contentsplit = content.Split('.');
 
-                        string Header = contentArgs[0];
-                        string[] HeaderArgs = Header.Split(' ');
-                        content = contentArgs[1];
-
-                        if (HeaderArgs[0] == true.ToString())
-                        { content = workObject.Encryption.Decrypt(content, workObject.Encryption.GetServerPrivateKey()); }
-
-                        content = content.Replace("%20%", " ");
-
-                        if (!CheckInternalCommands(content, workObject))
-                        {
-                            string[] commandArgs = content.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                            if (commandArgs[0].ToUpper() == "USER")
-                            {
-                                if (commandArgs[1].ToUpper() == "SETID")
-                                { workObject.clientTracker.SetID(HeaderArgs[1], workObject.clientSocket.RemoteEndPoint.ToString()); Send(workObject, "TRUE"); }
-                            }
-                            else if (workObject.clientTracker.IsLoggedIn)
-                            {
-                                OnBeforeClientRequestEventArgs onBeforeRequest = new OnBeforeClientRequestEventArgs { RawData = content, Client = workObject };
-                                eventTracker.OnBeforeClientRequest(this, onBeforeRequest);
-                                UniversalPlugin requestedPlugin = getPlugin(commandArgs[0]);
-
-                                if (onBeforeRequest.CancelRequest == ServerAPI.moonbyteCancelRequest.Continue)
-                                {
-                                    if (requestedPlugin.core.Invoke(workObject, commandArgs) == false)
-                                    {
-                                        Send(workObject, "USER_INVALIDPLUGINCOMMAND");
-                                    }
-                                }
-                                else
-                                {
-                                    Send(workObject, onBeforeRequest.ErrorMessage);
-                                }
-                            }
-                            else { Send(workObject, "USER_AUTHERROR"); }
-                        }
-
-                        //Starts a new async receive on the client
-                        workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, OnDataReceived, workObject);
                     }
                     else
                     {

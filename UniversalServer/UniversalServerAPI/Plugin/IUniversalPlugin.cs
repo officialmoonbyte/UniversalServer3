@@ -1,4 +1,6 @@
-﻿namespace Moonbyte.UniversalServerAPI.Plugin
+﻿using Moonbyte.UniversalServerAPI.Client;
+
+namespace Moonbyte.UniversalServerAPI.Plugin
 {
     /// <summary>
     /// Interface for developers to develop plugins for UniversalServer

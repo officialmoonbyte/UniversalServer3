@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Moonbyte.Security;
+using Newtonsoft.Json;
+using System;
+using System.Data.Common;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using UniversalClient.Security;
+using UniversalServer.Core.Networking;
 
-namespace UniversalClient
+namespace Moonbyte.Networking
 {
 
     // State object for receiving data from remote device.
@@ -20,7 +23,7 @@ namespace UniversalClient
         public StringBuilder sb = new StringBuilder();
     }
 
-    public class Universalclient
+    public class UniversalClient : IDisposable
     {
 
         #region Vars
@@ -44,12 +47,11 @@ namespace UniversalClient
 
         #region Initialization
 
-        public Universalclient(bool logEvents)
+        public UniversalClient(bool logEvents)
         {
             LogEvents = logEvents;
             Client = new TcpClient();
             Encryption = new ClientRSA();
-            Console.WriteLine(Encryption.GetClientPublicKey());
         }
 
         #endregion Intialization
@@ -64,27 +66,10 @@ namespace UniversalClient
 
             if (Client.Connected)
             {
-                SendMessage("Key_ServerPublic ", false);
-                this.Encryption.SetServerPublicKey(WaitForResult());
-                try
-                {
-                    string encryptedClientPublicKey = Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey());
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.StackTrace);
-                }
-                Console.WriteLine("Yah ::: " + Encryption.GetServerPublicKey());
-                SendMessage("Key_ClientPublic " + this.Encryption.Encrypt(Encryption.GetClientPublicKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
-                SendMessage("Key_ClientPrivate " + this.Encryption.Encrypt(Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey()), false); WaitForResult();
-
-                //Sends in the user data now, gets the user data encrypted first
-                SendMessage("User SetID "); string loginCheck = WaitForResult();
-                if (loginCheck.ToUpper() != "TRUE")
-                {
-                    Console.WriteLine("Failed to authorize user connection! Closing and disposing client object.");
-                    this.Disconnect(); this.Dispose();
-                }
+                string bdata = "datetime";
+                UniversalGetPacket getPacket = new UniversalGetPacket(
+                    new Get_Header() { type = bdata.GetType().ToString() },
+                    new Get_Message() { Data = bdata });
             }
         }
 
@@ -174,6 +159,12 @@ namespace UniversalClient
 
         #region SendMessage
 
+        public void SendMessage()
+
+        #endregion Sendmessage
+
+        #region SendMessage
+
         public void SendMessage(string Value, bool UseEncryption = true)
         {
             //Sends the message to the client
@@ -217,13 +208,9 @@ namespace UniversalClient
 
         #endregion Disconnect
 
-        #region Dispose
-
         public void Dispose()
         {
-
+            
         }
-
-        #endregion Dispose
     }
 }

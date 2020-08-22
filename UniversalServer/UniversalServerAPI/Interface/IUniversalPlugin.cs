@@ -1,4 +1,6 @@
-﻿namespace Moonbyte.UniversalServerAPI.Interface
+﻿using Moonbyte.UniversalServerAPI.Client;
+
+namespace Moonbyte.UniversalServerAPI.Interface
 {
     public interface IUniversalPlugin
     {

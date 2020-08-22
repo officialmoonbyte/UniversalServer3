@@ -1,7 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Text;
-
-namespace Moonbyte.UniversalServerAPI
+﻿namespace Moonbyte.UniversalServerAPI.Client
 {
     public class ClientSender
     {

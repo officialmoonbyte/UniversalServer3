@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace UniversalClient.Security
+namespace Moonbyte.Security
 {
     public class ClientRSA
     {

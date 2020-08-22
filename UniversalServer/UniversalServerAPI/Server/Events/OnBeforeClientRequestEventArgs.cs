@@ -1,4 +1,6 @@
-﻿namespace Moonbyte.UniversalServerAPI.TcpServer.Events
+﻿using Moonbyte.UniversalServerAPI.Client;
+
+namespace Moonbyte.UniversalServerAPI.TcpServer.Events
 {
     public class OnBeforeClientRequestEventArgs
     {

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace UniversalClient.Security
+namespace Moonbyte.Security
 {
     /// <summary>
     /// Generates a 16 byte Unique Identification code of a computer

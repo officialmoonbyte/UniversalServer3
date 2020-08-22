@@ -47,10 +47,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientSender.cs" />
-    <Compile Include="ClientTimeoutTimer.cs" />
-    <Compile Include="ClientTracker.cs" />
-    <Compile Include="ClientWorkObject.cs" />
+    <Compile Include="Client\ClientSender.cs" />
+    <Compile Include="Client\ClientTimeoutTimer.cs" />
+    <Compile Include="Client\ClientTracker.cs" />
+    <Compile Include="Client\ClientWorkObject.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="Interface\IUniversalPlugin.cs" />
     <Compile Include="Plugin\IUniversalPlugin.cs" />
@@ -59,11 +59,11 @@
     <Compile Include="Plugin\UniversalPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\ServerRSA.cs" />
-    <Compile Include="TcpServer\AsynchronousSocketListener.cs" />
-    <Compile Include="TcpServer\Events\OnBeforeClientRequestEventArgs.cs" />
-    <Compile Include="TcpServer\EventTracker.cs" />
-    <Compile Include="TcpServer\AsynchronousWebSocketListener.cs" />
-    <Compile Include="TcpServer\IPluginLoader.cs" />
+    <Compile Include="Server\AsynchronousSocketListener.cs" />
+    <Compile Include="Server\Events\OnBeforeClientRequestEventArgs.cs" />
+    <Compile Include="Server\EventTracker.cs" />
+    <Compile Include="Server\AsynchronousWebSocketListener.cs" />
+    <Compile Include="Server\IPluginLoader.cs" />
     <Compile Include="UniversalServerAPI.cs" />
   </ItemGroup>
   <ItemGroup>
