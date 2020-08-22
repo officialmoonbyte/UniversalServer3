@@ -2,7 +2,7 @@
 
 namespace UniversalServer.Core.Networking
 {
-    public class UniversalGetPacket
+    public class UniversalGetPacket : IUniversalPacket
     {
 
         #region Vars

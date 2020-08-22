@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Data.Common;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -30,7 +31,6 @@ namespace Moonbyte.Networking
 
         private TcpClient Client;
         ClientRSA Encryption;
-        public static bool LogEvents;
 
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
@@ -47,9 +47,8 @@ namespace Moonbyte.Networking
 
         #region Initialization
 
-        public UniversalClient(bool logEvents)
+        public UniversalClient()
         {
-            LogEvents = logEvents;
             Client = new TcpClient();
             Encryption = new ClientRSA();
         }
@@ -70,6 +69,7 @@ namespace Moonbyte.Networking
                 UniversalGetPacket getPacket = new UniversalGetPacket(
                     new Get_Header() { type = bdata.GetType().ToString() },
                     new Get_Message() { Data = bdata });
+                string serverdate = SendMessage(getPacket);
             }
         }
 
@@ -126,13 +126,11 @@ namespace Moonbyte.Networking
             byte[] data = new byte[Client.Client.ReceiveBufferSize];
             int receivedDataLength = Client.Client.Receive(data);
             string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            if (LogEvents) Console.WriteLine("Server response: " + stringData);
             string Final = stringData.Replace("%20%", " ");
             string[] splitFinal = Final.Split('|');
             if (splitFinal[0] == true.ToString())
             { Final = Encryption.Decrypt(splitFinal[1], Encryption.GetClientPrivateKey()); }
             else { Final = splitFinal[1]; }
-            Console.WriteLine("Final : " + Final);
 
             return Final;
 
@@ -149,7 +147,6 @@ namespace Moonbyte.Networking
                 args[i] = args[i].Replace(" ", "%20%");
             }
             string ArgsSend = string.Join(" ", args);
-            if (LogEvents) Console.WriteLine("Args Send : " + ArgsSend);
             string valueToSend = Command + " " + ArgsSend;
             SendMessage(valueToSend);
             return WaitForResult();
@@ -157,28 +154,27 @@ namespace Moonbyte.Networking
 
         #endregion SendCommand
 
-        #region SendMessage
+        #region SendMessage (Internal)
 
-        public void SendMessage()
+        private string SendMessage(IUniversalPacket packet)
+        {
+            byte[] BytesToSend = Encoding.UTF8.GetBytes(packet.ToString() + "<EOF>");
+            Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
+            return WaitForResult();
+        }
 
-        #endregion Sendmessage
+        #endregion SendMessage (Internal)
 
         #region SendMessage
 
         public void SendMessage(string Value, bool UseEncryption = true)
         {
-            //Sends the message to the client
-            string stringToSend = Value.Replace(" ", "%20%");
-            if (UseEncryption)
-            { stringToSend = Encryption.Encrypt(stringToSend, Encryption.GetServerPublicKey()); }
+            if (UseEncryption) { Value = Encryption.Encrypt(Value, Encryption.GetServerPublicKey()); }
+            UniversalPacket packet = new UniversalPacket(
+                new Header() { type = Value.GetType().ToString(), dateTime = new DateTime(), status = UniversalPacket.HTTPSTATUS.GET },
+                new Message() { IsEncrypted = UseEncryption, Data = Value },
+                new Signature() { clientId = FingerPrint.Value(), clientIp = new WebClient().DownloadString("http://icanhazip.com") });
 
-            string Header = UseEncryption.ToString() + "%20%" + FingerPrint.Value() + "|";
-            stringToSend = Header + stringToSend;
-
-            if (LogEvents) Console.WriteLine("Sending " + stringToSend);
-            stringToSend += "<EOF>";
-            byte[] BytesToSend = Encoding.UTF8.GetBytes(stringToSend);
-            Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
         }
 
         #endregion SendMessage
@@ -187,14 +183,7 @@ namespace Moonbyte.Networking
 
         private void SendCallBack(IAsyncResult ar)
         {
-            if (ar.IsCompleted)
-            {
-                if (LogEvents) Console.WriteLine("Data sent sucessfully!");
-            }
-            else
-            {
-                if (LogEvents) Console.WriteLine("Data was not sucessfully!");
-            }
+
         }
 
         #endregion SendCallBack

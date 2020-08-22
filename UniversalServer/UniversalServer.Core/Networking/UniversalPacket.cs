@@ -3,7 +3,7 @@ using System;
 
 namespace UniversalServer.Core.Networking
 {
-    public class UniversalPacket
+    public class UniversalPacket : IUniversalPacket
     {
 
         #region Vars
