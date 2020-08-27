@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Networking\IUniversapPacket.cs" />
+    <Compile Include="Networking\IUniversalPacket.cs" />
     <Compile Include="Networking\UniversalGetPacket.cs" />
     <Compile Include="Networking\UniversalMessage.cs" />
     <Compile Include="Networking\UniversalPacket.cs" />

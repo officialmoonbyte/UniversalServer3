@@ -47,13 +47,20 @@ namespace Moonbyte.UniversalServer.TcpServer
             Type[] types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => interfaceType.IsAssignableFrom(p) && p.IsClass).ToArray();
             foreach (Type type in types)
             {
-                UniversalPlugin plugin = (UniversalPlugin)Activator.CreateInstance(type);
-                ILogger.AddToLog("INFO", "Initializing [" + plugin.core.Name + "]");
-                plugin.core.SetUniversalPluginAPI(plugin);
-                plugin.core.Initialize(Path.Combine(pluginDataDirectory, plugin.core.Name), plugin);
+                try
+                {
+                    UniversalPlugin plugin = (UniversalPlugin)Activator.CreateInstance(type);
+                    ILogger.AddToLog("INFO", "Initializing [" + plugin.core.Name + "]");
+                    plugin.core.SetUniversalPluginAPI(plugin);
+                    plugin.core.Initialize(Path.Combine(pluginDataDirectory, plugin.core.Name), plugin);
 
-                returnPlugins.Add(plugin);
-                ILogger.AddToLog("INFO", "Plugin [" + plugin.core.Name + "] Fully loaded!");
+                    returnPlugins.Add(plugin);
+                    ILogger.AddToLog("INFO", "Plugin [" + plugin.core.Name + "] Fully loaded!");
+                }
+                catch (Exception e)
+                {
+                    //Tried to load the assembly instance
+                }
             }
 
             ILogger.AddWhitespace();

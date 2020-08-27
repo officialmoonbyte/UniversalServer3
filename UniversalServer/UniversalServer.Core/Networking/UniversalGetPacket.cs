@@ -7,6 +7,7 @@ namespace UniversalServer.Core.Networking
 
         #region Vars
         public enum HTTPSTATUS { GET, SET }
+        public readonly string SplitString = "|SPLT|";
         public Get_Header MessageHeader = new Get_Header();
         public Get_Message MessageData = new Get_Message();
 
@@ -22,8 +23,10 @@ namespace UniversalServer.Core.Networking
         #endregion Initialization
 
         #region ToString
-        public override string ToString() => JsonConvert.SerializeObject(MessageHeader) + "." + JsonConvert.SerializeObject(MessageData.Data);
+        public override string ToString() => JsonConvert.SerializeObject(MessageHeader) + SplitString 
+            + JsonConvert.SerializeObject(MessageData.Data);
 
+        public string GetSplitString() => SplitString;
         #endregion ToString
     }
 

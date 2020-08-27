@@ -32,7 +32,7 @@ namespace UniversalServer
             foreach(string directory in Directory.GetDirectories(ServerDirectories))
             {
                 string serverName = new DirectoryInfo(directory).Name;
-                AsynchronousSocketListener socketListener = new AsynchronousSocketListener(serverName, Path.Combine(ServerDirectories, serverName));
+                AsynchronousSocketListener socketListener = new AsynchronousSocketListener(serverName);
                 TcpServers.Add(socketListener);
             }
         }

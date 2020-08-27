@@ -8,7 +8,7 @@ namespace UniversalServer.Commandline
         public static void CreateServer(string ServerName)
         {
             //Initializes the server
-            AsynchronousSocketListener serverListener = new AsynchronousSocketListener(ServerName, Universalserver.ServerDirectories + @"\" + ServerName);
+            AsynchronousSocketListener serverListener = new AsynchronousSocketListener(ServerName);
             Universalserver.TcpServers.Add(serverListener);
             ILogger.AddToLog("INFO", "Created " + ServerName + ".");
             ILogger.AddToLog("INFO", "To start the seBrver, please type the command [Start " + ServerName + "]");
