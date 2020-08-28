@@ -1,5 +1,6 @@
 ﻿using Moonbyte.Security;
 using Moonbyte.UniversalServer.Core.Networking;
+using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -29,6 +30,7 @@ namespace Moonbyte.Networking
 
         private TcpClient Client;
         ClientRSA Encryption;
+        Signature clientSigniture;
 
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
@@ -49,6 +51,8 @@ namespace Moonbyte.Networking
         {
             Client = new TcpClient();
             Encryption = new ClientRSA();
+            clientSigniture.clientId = FingerPrint.Value();
+            clientSigniture.clientIp = new WebClient().DownloadString("http://icanhazip.com");
         }
 
         #endregion Intialization
@@ -63,11 +67,32 @@ namespace Moonbyte.Networking
 
             if (Client.Connected)
             {
-                string bdata = "datetime";
-                UniversalGetPacket getPacket = new UniversalGetPacket(
-                    new Get_Header() { type = bdata.GetType().ToString() },
-                    new Get_Message() { Data = bdata });
-                string serverdate = SendMessage(getPacket);
+                UniversalPacket getServerPublicKeyRequest = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.GET },
+                    new Message { Data = JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "getserverpublickey" }), IsEncrypted = false },
+                    clientSigniture);
+                this.Encryption.SetServerPublicKey(SendMessage(getServerPublicKeyRequest));
+
+                UniversalPacket sendClientPublicKey = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.POST },
+                    new Message { 
+                        Data = Encryption.Encrypt(
+                        JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "setclientpublickey", Encryption.GetClientPublicKey() }),
+                        Encryption.GetServerPublicKey()), IsEncrypted = true },
+                    clientSigniture);
+                SendMessage(sendClientPublicKey);
+
+                UniversalPacket sendClientPrivateKey = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.POST },
+                    new Message
+                    {
+                        Data = Encryption.Encrypt(
+                        JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "setclientprivatekey", Encryption.GetClientPrivateKey() }),
+                        Encryption.GetServerPublicKey()),
+                        IsEncrypted = true
+                    },
+                    clientSigniture);
+                SendMessage(sendClientPrivateKey);
             }
         }
 

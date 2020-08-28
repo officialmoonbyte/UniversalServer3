@@ -1,4 +1,5 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
+using Moonbyte.UniversalServer.Core.Networking;
 using Moonbyte.UniversalServer.Core.Server;
 using System;
 
@@ -41,7 +42,29 @@ namespace UniversalServer.Core.Command
 
         #region UniversalPacket
 
+        public void ProcessUniversalPacketCommand(UniversalPacket universalPacket, ClientWorkObject client, AsynchronousSocketListener server)
+        {
+            universalPacket.MessageHeader.dateTime = DateTime.Now;
+            
+            string clientId = universalPacket.MessageSignature.clientId;
+            string clientIp = universalPacket.MessageSignature.clientIp;
+            string response = (string)universalPacket.MessageData.Data;
 
+            if (universalPacket.MessageData.IsEncrypted)
+            {
+                if (client.Encryption.GetClientPrivateKey() != null)
+                {
+                    response = client.Encryption.Decrypt(response, client.Encryption.GetClientPrivateKey());
+                }
+                else
+                {
+                    server.Send(client, "Missing Private Key", false);
+                    return;
+                }
+            }
+
+            bool check = false;
+        }
 
         #endregion UniversalPacket
         public void Dispose() { }

@@ -7,7 +7,7 @@ namespace Moonbyte.UniversalServer.Core.Networking
     {
 
         #region Vars
-        public enum HTTPSTATUS { GET, SET}
+        public enum HTTPSTATUS { GET, POST}
         public enum SupportedTypes { JsonObject }
         public readonly string SplitString = "|SPLT|";
         public Header MessageHeader = new Header();
@@ -45,7 +45,7 @@ namespace Moonbyte.UniversalServer.Core.Networking
 
     public class Message
     {
-        public object Data;
+        public string Data;
         public bool IsEncrypted;
     }
 
