@@ -34,6 +34,9 @@
     <Reference Include="MoonbyteSettingsManager, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MSM.2.0.1\lib\net45\MoonbyteSettingsManager.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -60,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\ServerRSA.cs" />
     <Compile Include="Server\AsynchronousSocketListener.cs" />
+    <Compile Include="Server\data\NetworkDataProcessor.cs" />
     <Compile Include="Server\Events\OnBeforeClientRequestEventArgs.cs" />
     <Compile Include="Server\EventTracker.cs" />
     <Compile Include="Server\AsynchronousWebSocketListener.cs" />
@@ -73,6 +77,10 @@
     <ProjectReference Include="..\ILogger\ILogger.csproj">
       <Project>{8c6a9e89-f2c4-4f29-ad6f-aca2d3793b35}</Project>
       <Name>ILogger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UniversalServer.Core\UniversalServer.Core.csproj">
+      <Project>{8B15417F-6AA2-4908-823A-811E25123539}</Project>
+      <Name>UniversalServer.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

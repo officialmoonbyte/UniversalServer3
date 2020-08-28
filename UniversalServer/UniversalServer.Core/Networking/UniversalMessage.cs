@@ -1,4 +1,4 @@
-﻿namespace UniversalServer.Core.Networking
+﻿namespace Moonbyte.UniversalServer.Core.Networking
 {
     public class UniversalMessage
     {

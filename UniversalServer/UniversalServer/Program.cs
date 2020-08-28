@@ -1,4 +1,4 @@
-﻿using Moonbyte.Logging;
+﻿using Moonbyte.UniversalServer.Core.Logging;
 
 namespace UniversalServer
 {

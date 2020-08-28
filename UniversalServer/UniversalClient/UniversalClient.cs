@@ -1,12 +1,10 @@
 ﻿using Moonbyte.Security;
-using Newtonsoft.Json;
+using Moonbyte.UniversalServer.Core.Networking;
 using System;
-using System.Data.Common;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using UniversalServer.Core.Networking;
 
 namespace Moonbyte.Networking
 {

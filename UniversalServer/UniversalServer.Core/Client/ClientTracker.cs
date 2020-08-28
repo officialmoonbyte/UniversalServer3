@@ -1,11 +1,9 @@
-﻿using Moonbyte.Logging;
+﻿using Moonbyte.UniversalServer.Core.Logging;
 using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Moonbyte.UniversalServer.Core.Client
 {

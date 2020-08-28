@@ -1,9 +1,9 @@
-﻿using Moonbyte.Logging;
-using Moonbyte.UniversalServerAPI;
-using Moonbyte.UniversalServerAPI.Client;
-using Moonbyte.UniversalServerAPI.Plugin;
-using Moonbyte.UniversalServerAPI.Server.data;
-using Moonbyte.UniversalServerAPI.TcpServer;
+﻿using Moonbyte.UniversalServer.Core.Client;
+using Moonbyte.UniversalServer.Core.Logging;
+using Moonbyte.UniversalServer.Core.Model;
+using Moonbyte.UniversalServer.Core.Plugin;
+using Moonbyte.UniversalServer.Core.Server.Data;
+using Moonbyte.UniversalServer.Plugin.Module;
 using MoonbyteSettingsManager;
 using System;
 using System.Collections.Generic;
@@ -13,9 +13,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using UniversalServer.Core.Networking;
 
-namespace Moonbyte.UniversalServer.TcpServer
+namespace Moonbyte.UniversalServer.Core.Server
 {
     public class AsynchronousSocketListener
     {
@@ -31,7 +30,7 @@ namespace Moonbyte.UniversalServer.TcpServer
         private MSMCore serverSettings = new MSMCore();
         bool pluginsLoaded = false;
         Socket serverlistener = null;
-        AsynchronousWebSocketListener webServer;
+        //AsynchronousWebSocketListener webServer;
 
         public string ServerName;
         public Logger serverPluginLogger = new Logger();
@@ -126,8 +125,8 @@ namespace Moonbyte.UniversalServer.TcpServer
             int ServerPort = this.getServerPort();
             this.Port = ServerPort;
 
-            if (webServerEnabled)
-            { webServer = new AsynchronousWebSocketListener(IPAddress.Any.ToString(), Port + 1); }
+            //if (webServerEnabled)
+            //{ webServer = new AsynchronousWebSocketListener(IPAddress.Any.ToString(), Port + 1); }
 
             serverPlugins = pluginLoader.LoadPlugins(GetPluginDirectory);
             pluginsLoaded = true;
@@ -164,7 +163,7 @@ namespace Moonbyte.UniversalServer.TcpServer
 
             try
             {
-                string[] dataReceived = bytesToStringArray(workObject, result);
+                string[] dataReceived = Utility.bytesToStringArray(workObject, workObject.clientSocket.EndReceive(result), this);
                 networkDataProcessor.ProcessDataReceived(workObject, dataReceived);
             }
             catch (Exception e)

@@ -33,6 +33,9 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MoonbyteSettingsManager, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSM.2.0.1\lib\net45\MoonbyteSettingsManager.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -46,11 +49,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\ClientSender.cs" />
+    <Compile Include="Client\ClientTimeoutTimer.cs" />
+    <Compile Include="Client\ClientTracker.cs" />
+    <Compile Include="Client\ClientWorkObject.cs" />
+    <Compile Include="Command\CommandManager.cs" />
+    <Compile Include="Command\IUniversalGetCommand.cs" />
+    <Compile Include="Command\UniversalGetPacketCommands\datetime.cs" />
+    <Compile Include="Logger\Logger.cs" />
+    <Compile Include="Model\Utility.cs" />
     <Compile Include="Networking\IUniversalPacket.cs" />
     <Compile Include="Networking\UniversalGetPacket.cs" />
     <Compile Include="Networking\UniversalMessage.cs" />
     <Compile Include="Networking\UniversalPacket.cs" />
+    <Compile Include="Plugin\IUniversalPlugin.cs" />
+    <Compile Include="Plugin\module\ILogger.cs" />
+    <Compile Include="Plugin\module\PluginEventManager.cs" />
+    <Compile Include="Plugin\UniversalPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\ServerRSA.cs" />
+    <Compile Include="Server\AsynchronousSocketListener.cs" />
+    <Compile Include="Server\AsynchronousWebSocketListener.cs" />
+    <Compile Include="Server\Data\NetworkDataProcessor.cs" />
+    <Compile Include="Server\Data\PostProcessingUniversalGetPacket.cs" />
+    <Compile Include="Server\Events\OnBeforeClientRequestEventArgs.cs" />
+    <Compile Include="Server\EventTracker.cs" />
+    <Compile Include="Server\IPluginLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

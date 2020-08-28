@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace UniversalServer.Core.Networking
+namespace Moonbyte.UniversalServer.Core.Networking
 {
     public class UniversalGetPacket : IUniversalPacket
     {
@@ -24,7 +24,7 @@ namespace UniversalServer.Core.Networking
 
         #region ToString
         public override string ToString() => JsonConvert.SerializeObject(MessageHeader) + SplitString 
-            + JsonConvert.SerializeObject(MessageData.Data);
+            + JsonConvert.SerializeObject(MessageData);
 
         public string GetSplitString() => SplitString;
         #endregion ToString

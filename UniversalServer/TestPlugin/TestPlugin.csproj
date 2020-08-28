@@ -45,9 +45,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UniversalServerAPI\UniversalServerAPI.csproj">
-      <Project>{9cae9423-6646-46b1-9e4e-a1ed89dd5c5e}</Project>
-      <Name>UniversalServerAPI</Name>
+    <ProjectReference Include="..\UniversalServer.Core\UniversalServer.Core.csproj">
+      <Project>{8b15417f-6aa2-4908-823a-811e25123539}</Project>
+      <Name>UniversalServer.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

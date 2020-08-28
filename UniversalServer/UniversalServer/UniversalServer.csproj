@@ -99,16 +99,6 @@
     <None Include="UniversalServer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ILogger\ILogger.csproj">
-      <Project>{8c6a9e89-f2c4-4f29-ad6f-aca2d3793b35}</Project>
-      <Name>ILogger</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UniversalServerAPI\UniversalServerAPI.csproj">
-      <Project>{9cae9423-6646-46b1-9e4e-a1ed89dd5c5e}</Project>
-      <Name>UniversalServerAPI</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
@@ -119,6 +109,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UniversalServer.Core\UniversalServer.Core.csproj">
+      <Project>{8b15417f-6aa2-4908-823a-811e25123539}</Project>
+      <Name>UniversalServer.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

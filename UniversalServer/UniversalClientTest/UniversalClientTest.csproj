@@ -54,6 +54,10 @@
       <Project>{b2794dac-e927-432a-87f5-1e1fe80f6513}</Project>
       <Name>UniversalClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\UniversalServer.Core\UniversalServer.Core.csproj">
+      <Project>{8b15417f-6aa2-4908-823a-811e25123539}</Project>
+      <Name>UniversalServer.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,5 @@
-﻿using Moonbyte.Logging;
-using Moonbyte.UniversalServer.TcpServer;
+﻿using Moonbyte.UniversalServer.Core.Logging;
+using Moonbyte.UniversalServer.Core.Server;
 
 namespace UniversalServer.Commandline
 {
