@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Moonbyte.Security
@@ -92,7 +93,7 @@ namespace Moonbyte.Security
                         result = mo[wmiProperty].ToString();
                         break;
                     }
-                    catch
+                    catch (NullReferenceException e)
                     {
                     }
                 }

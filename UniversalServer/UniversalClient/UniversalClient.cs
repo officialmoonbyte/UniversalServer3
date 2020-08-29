@@ -30,7 +30,7 @@ namespace Moonbyte.Networking
 
         private TcpClient Client;
         ClientRSA Encryption;
-        Signature clientSigniture;
+        Signature clientSignature;
 
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
@@ -51,8 +51,9 @@ namespace Moonbyte.Networking
         {
             Client = new TcpClient();
             Encryption = new ClientRSA();
-            clientSigniture.clientId = FingerPrint.Value();
-            clientSigniture.clientIp = new WebClient().DownloadString("http://icanhazip.com");
+            clientSignature = new Signature();
+            clientSignature.clientId = FingerPrint.Value();
+            clientSignature.clientIp = new WebClient().DownloadString("http://icanhazip.com");
         }
 
         #endregion Intialization
@@ -70,8 +71,9 @@ namespace Moonbyte.Networking
                 UniversalPacket getServerPublicKeyRequest = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.GET },
                     new Message { Data = JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "getserverpublickey" }), IsEncrypted = false },
-                    clientSigniture);
-                this.Encryption.SetServerPublicKey(SendMessage(getServerPublicKeyRequest));
+                    clientSignature);
+                string s = SendMessage(getServerPublicKeyRequest);
+                this.Encryption.SetServerPublicKey(s);
 
                 UniversalPacket sendClientPublicKey = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
@@ -79,7 +81,7 @@ namespace Moonbyte.Networking
                         Data = Encryption.Encrypt(
                         JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "setclientpublickey", Encryption.GetClientPublicKey() }),
                         Encryption.GetServerPublicKey()), IsEncrypted = true },
-                    clientSigniture);
+                    clientSignature);
                 SendMessage(sendClientPublicKey);
 
                 UniversalPacket sendClientPrivateKey = new UniversalPacket(
@@ -91,7 +93,7 @@ namespace Moonbyte.Networking
                         Encryption.GetServerPublicKey()),
                         IsEncrypted = true
                     },
-                    clientSigniture);
+                    clientSignature);
                 SendMessage(sendClientPrivateKey);
             }
         }
@@ -150,13 +152,8 @@ namespace Moonbyte.Networking
             int receivedDataLength = Client.Client.Receive(data);
             string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
             string Final = stringData.Replace("%20%", " ");
-            string[] splitFinal = Final.Split('|');
-            if (splitFinal[0] == true.ToString())
-            { Final = Encryption.Decrypt(splitFinal[1], Encryption.GetClientPrivateKey()); }
-            else { Final = splitFinal[1]; }
 
             return Final;
-
         }
 
         #endregion WaitForResult
