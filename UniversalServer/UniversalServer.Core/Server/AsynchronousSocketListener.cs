@@ -5,6 +5,7 @@ using Moonbyte.UniversalServer.Core.Plugin;
 using Moonbyte.UniversalServer.Core.Server.Data;
 using Moonbyte.UniversalServer.Plugin.Module;
 using MoonbyteSettingsManager;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using UniversalServer.Core.Networking;
 
 namespace Moonbyte.UniversalServer.Core.Server
 {
@@ -164,7 +166,11 @@ namespace Moonbyte.UniversalServer.Core.Server
             try
             {
                 string[] dataReceived = Utility.bytesToStringArray(workObject, workObject.clientSocket.EndReceive(result), this);
-                networkDataProcessor.ProcessDataReceived(workObject, dataReceived);
+                if (dataReceived != null)
+                {
+                    networkDataProcessor.ProcessDataReceived(workObject, dataReceived);
+                    workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, onDataReceived, workObject);
+                }
             }
             catch (Exception e)
             {
@@ -197,13 +203,15 @@ namespace Moonbyte.UniversalServer.Core.Server
 
         public void Send(ClientWorkObject workObject, string data, bool useEncryption = true)
         {
-            string header = useEncryption + "|";
+            UniversalServerPacket serverPacket = new UniversalServerPacket
+            {
+                Encrypted = useEncryption,
+                Message = data
+            };
 
-            if (useEncryption) { data = workObject.Encryption.Encrypt(data, workObject.Encryption.GetClientPublicKey()); }
+            if (useEncryption) { serverPacket.Message = workObject.Encryption.Encrypt(data, workObject.Encryption.GetClientPublicKey()); }
 
-            data = header + data;
-
-            workObject.clientSocket.Send(Encoding.ASCII.GetBytes(data));
+            workObject.clientSocket.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(serverPacket)));
         }
 
         #endregion Send
@@ -238,32 +246,6 @@ namespace Moonbyte.UniversalServer.Core.Server
         }
 
         #endregion ConsoleInvoke
-
-        #region InternalServerCommands
-
-        private bool checkInternalCommands(string rawCommand, ClientWorkObject workObject)
-        {
-            bool returnValue = false;
-
-            string[] args = rawCommand.Split(' ');
-
-            if (args[0].ToUpper() == "KEY_SERVERPUBLIC")
-            { Send(workObject, workObject.Encryption.GetServerPublicKey(), false); returnValue = true; }
-            if (args[0].ToUpper() == "KEY_CLIENTPUBLIC")
-            { workObject.Encryption.SetClientPublicKey(workObject.Encryption.Decrypt(args[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString(), false); returnValue = true; }
-            if (args[0].ToUpper() == "KEY_CLIENTPRIVATE")
-            { workObject.Encryption.SetClientPrivateKey(workObject.Encryption.Decrypt(args[1], workObject.Encryption.GetServerPrivateKey())); Send(workObject, true.ToString(), false); returnValue = true; }
-
-            return returnValue;
-        }
-
-        #region GetPublicServerKey
-
-
-
-        #endregion GetPublicServerKey
-
-        #endregion InternalServerCommands
 
         #region Dispose
 

@@ -1,6 +1,9 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
 using Moonbyte.UniversalServer.Core.Networking;
 using Newtonsoft.Json;
+using System;
+using System.Net;
+using UniversalServer.Core.Command;
 using UniversalServer.Core.Server.Data;
 
 namespace Moonbyte.UniversalServer.Core.Server.Data
@@ -33,13 +36,36 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
 
         private void postProcessUniversalPacket(ClientWorkObject workObject, IUniversalPacket universalPacket)
         {
+            UniversalPacket clientPacket = (UniversalPacket)universalPacket;
 
+            //Checks if the user ID is registered (IsLoggedIn)
+            //If the ID is not stored then stores the ID and
+            //the IP of the client for logging reasons.
+            if (!workObject.clientTracker.IsLoggedIn) workObject.clientTracker.SetID(clientPacket.MessageSignature.clientId, 
+                                                        ((IPEndPoint)workObject.clientSocket.RemoteEndPoint).Address.ToString(), 
+                                                        clientPacket.MessageSignature.clientIp);
+            clientPacket.MessageHeader.dateTime = DateTime.Now; //Sets the datetime if its null
+
+            //Decrypts the information
+            if (clientPacket.MessageData.IsEncrypted) clientPacket.MessageData.Data = workObject.Encryption.Decrypt(clientPacket.MessageData.Data, workObject.Encryption.GetServerPrivateKey());
+
+            //Processes the command
+            bool sentClientData = false;
+            using (CommandManager commandManager = new CommandManager())
+            {
+                sentClientData = commandManager.ProcessUniversalPacketCommand(clientPacket, workObject, workObject.serverSocket);
+            }
+
+            //Sends data to client if false
+            if (!sentClientData) workObject.serverSocket.Send(workObject, "Unknown Command!", false);
         }
 
         private IUniversalPacket getUniversalPacket(string[] dataReceived)
         {
+            if (dataReceived == null) return null;
             Header header = JsonConvert.DeserializeObject<Header>(dataReceived[0]);
             Message message = JsonConvert.DeserializeObject<Message>(dataReceived[1]);
+            message.IsEncrypted = bool.Parse(dataReceived[3]);
             Signature signature = JsonConvert.DeserializeObject<Signature>(dataReceived[2]);
 
             return new UniversalPacket(header, message, signature);

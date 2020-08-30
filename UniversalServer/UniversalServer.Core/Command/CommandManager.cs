@@ -1,7 +1,9 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
 using Moonbyte.UniversalServer.Core.Networking;
 using Moonbyte.UniversalServer.Core.Server;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace UniversalServer.Core.Command
 {
@@ -25,45 +27,34 @@ namespace UniversalServer.Core.Command
 
         public void ProcessUniversalGetPacketCommand(string messageData, ClientWorkObject client, AsynchronousSocketListener server)
         {
-            bool clientSentData = false;
-            foreach(IUniversalGetCommand getCommand in UniversalGetCommand.GetDefaultGetCommands())
-            {
-                if (getCommand.Name().ToLower() == messageData) { server.Send(client, getCommand.Get(), false); clientSentData = true; }
-            }
-
-            if (clientSentData == false)
-            {
-                server.Send(client, "Unknowncommand " + messageData, false);
-                server.serverPluginLogger.AddToLog("UGETPacket", "Client tried to use [" + messageData + "], returned with Unknown command error");
-            }
+            server.Send(client, "Unsupported Request");
         }
 
         #endregion UniversalGetPacket
 
         #region UniversalPacket
 
-        public void ProcessUniversalPacketCommand(UniversalPacket universalPacket, ClientWorkObject client, AsynchronousSocketListener server)
+        public bool ProcessUniversalPacketCommand(UniversalPacket universalPacket, ClientWorkObject client, AsynchronousSocketListener server)
         {
-            universalPacket.MessageHeader.dateTime = DateTime.Now;
-            
-            string clientId = universalPacket.MessageSignature.clientId;
-            string clientIp = universalPacket.MessageSignature.clientIp;
-            string response = (string)universalPacket.MessageData.Data;
+             bool sentClientData = false;
 
-            if (universalPacket.MessageData.IsEncrypted)
+            string[] commandArgs = ((string[])JsonConvert.DeserializeObject<string[]>(universalPacket.MessageData.Data));
+
+            foreach (IUniversalCommand universalCommand in UniversalCommand.GetDefaultCommands())
             {
-                if (client.Encryption.GetClientPrivateKey() != null)
+                if (universalCommand.GetNamespace().ToLower() == commandArgs[0].ToLower())
                 {
-                    response = client.Encryption.Decrypt(response, client.Encryption.GetClientPrivateKey());
-                }
-                else
-                {
-                    server.Send(client, "Missing Private Key", false);
-                    return;
+                    bool tmpbool = universalCommand.Invoke(commandArgs, universalPacket, client);
+                    server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" + universalCommand.GetNamespace() + ".");
+                    if (tmpbool == true) { sentClientData = true; return tmpbool; }
                 }
             }
 
-            bool check = false;
+            if (sentClientData) return sentClientData;
+
+            //Process plugins
+
+            return sentClientData;
         }
 
         #endregion UniversalPacket

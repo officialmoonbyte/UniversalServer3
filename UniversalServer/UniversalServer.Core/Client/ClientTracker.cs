@@ -12,7 +12,8 @@ namespace Moonbyte.UniversalServer.Core.Client
         #region Vars
 
         public string userID;
-        public string userEndpoint;
+        public string userServerEndPoint;
+        public string userClientEndPoint;
         public MSMVault ClientStorage = new MSMVault();
 
         private bool isLoggedIn = false;
@@ -57,10 +58,11 @@ namespace Moonbyte.UniversalServer.Core.Client
 
         #region SetID
 
-        public void SetID(string UserID, string UserEndpoint)
+        public void SetID(string UserID, string UserServerEndPoint, string UserClientEndPoint)
         {
             userID = UserID;
-            userEndpoint = UserEndpoint;
+            userServerEndPoint = UserServerEndPoint;
+            userClientEndPoint = UserClientEndPoint;
 
             UserDirectory = UserDirectories + @"\" + userID;
 
@@ -75,18 +77,18 @@ namespace Moonbyte.UniversalServer.Core.Client
             if (ClientStorage.CheckSetting(_UserLoginDates))
             {
                 List<string> oldData = ClientStorage.ReadSetting(_UserLoginDates).Split(Seperators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                oldData.Add(DateTime.Now.ToString() + internalSeperator + userEndpoint);
+                oldData.Add(DateTime.Now.ToString() + internalSeperator + userServerEndPoint);
 
                 string newData = String.Join(Seperators[0], oldData);
                 ClientStorage.EditSetting(_UserLoginDates, newData);
             }
             else
             {
-                string newData = DateTime.Now.ToString() + internalSeperator + userEndpoint;
+                string newData = DateTime.Now.ToString() + internalSeperator + userServerEndPoint;
                 ClientStorage.EditSetting(_UserLoginDates, newData);
             }
 
-            ILogger.AddToLog("INFO", "Client [" + userEndpoint + "] has logged in with ID [" + userID + "]");
+            ILogger.AddToLog("INFO", "Client [" + userServerEndPoint + "] has logged in with ID [" + userID + "]");
         }
 
         #endregion SetID
@@ -98,18 +100,18 @@ namespace Moonbyte.UniversalServer.Core.Client
             if (ClientStorage.CheckSetting(_UserDisconnectedDates))
             {
                 List<string> oldData = ClientStorage.ReadSetting(_UserDisconnectedDates).Split(Seperators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                oldData.Add(DateTime.Now.ToString() + internalSeperator + userEndpoint);
+                oldData.Add(DateTime.Now.ToString() + internalSeperator + userServerEndPoint);
 
                 string newData = String.Join(Seperators[0], oldData);
                 ClientStorage.EditSetting(_UserDisconnectedDates, newData);
             }
             else
             {
-                string newData = DateTime.Now.ToString() + internalSeperator + userEndpoint;
+                string newData = DateTime.Now.ToString() + internalSeperator + userServerEndPoint;
                 ClientStorage.EditSetting(_UserDisconnectedDates, newData);
             }
 
-            ILogger.AddToLog("INFO", "Client [" + userEndpoint + "] has disconnected with id [" + userID + "]");
+            ILogger.AddToLog("INFO", "Client [" + userServerEndPoint + "] has disconnected with id [" + userID + "]");
         }
 
         #endregion LogDisconnect

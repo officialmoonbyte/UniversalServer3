@@ -21,6 +21,9 @@ namespace Moonbyte.UniversalServer.Core.Model
 
                 if (content.IndexOf("<EOF>") > -1)
                 {
+                    workObject.sb = new StringBuilder();
+                    workObject.buffer = new byte[ClientWorkObject.BufferSize];
+
                     returnStringArray = content.Split(new string[] { "|SPLT|", "<EOF>" },
                                     StringSplitOptions.RemoveEmptyEntries);
                 }

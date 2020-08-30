@@ -1,5 +1,6 @@
 ﻿using Moonbyte.UniversalServer.Core.Security;
 using Moonbyte.UniversalServer.Core.Server;
+using System;
 using System.Net.Sockets;
 using System.Text;
 
@@ -60,11 +61,18 @@ namespace Moonbyte.UniversalServer.Core.Client
 
         public void Dispose()
         {
-            clientTracker.LogDisconnect();
-            clientSocket.Shutdown(SocketShutdown.Both);
-            clientSocket.Close();
+            try
+            {
+                clientTracker.LogDisconnect();
+                clientSocket.Shutdown(SocketShutdown.Both);
+                clientSocket.Close();
 
-            clientTimeoutTimer.Dispose();
+                clientTimeoutTimer.Dispose();
+            }
+            catch (Exception e)
+            {
+                serverSocket.serverPluginLogger.LogExceptions(e);
+            }
         }
 
         #endregion Dispose

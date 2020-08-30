@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using UniversalServer.Core.Networking;
 
 namespace Moonbyte.Networking
 {
@@ -70,31 +71,31 @@ namespace Moonbyte.Networking
             {
                 UniversalPacket getServerPublicKeyRequest = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.GET },
-                    new Message { Data = JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "getserverpublickey" }), IsEncrypted = false },
+                    new Message { Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.getserverpublickey" }), IsEncrypted = false },
                     clientSignature);
-                string s = SendMessage(getServerPublicKeyRequest);
-                this.Encryption.SetServerPublicKey(s);
+                UniversalServerPacket s = SendMessage(getServerPublicKeyRequest);
+                this.Encryption.SetServerPublicKey(s.Message);
 
                 UniversalPacket sendClientPublicKey = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message { 
                         Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "setclientpublickey", Encryption.GetClientPublicKey() }),
-                        Encryption.GetServerPublicKey()), IsEncrypted = true },
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey", 
+                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()), IsEncrypted = true },
                     clientSignature);
-                SendMessage(sendClientPublicKey);
+                UniversalServerPacket bs = SendMessage(sendClientPublicKey);
+                Console.WriteLine(bs.Message);
 
                 UniversalPacket sendClientPrivateKey = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
                         Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "servercommand", "encryption", "setclientprivatekey", Encryption.GetClientPrivateKey() }),
-                        Encryption.GetServerPublicKey()),
-                        IsEncrypted = true
-                    },
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey", 
+                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()), IsEncrypted = true },
                     clientSignature);
-                SendMessage(sendClientPrivateKey);
+                UniversalServerPacket bs2 = SendMessage(sendClientPrivateKey);
+                Console.WriteLine(bs2.Message);
             }
         }
 
@@ -146,58 +147,28 @@ namespace Moonbyte.Networking
             }
         }
 
-        public string WaitForResult()
+        public UniversalServerPacket WaitForResult()
         {
             byte[] data = new byte[Client.Client.ReceiveBufferSize];
             int receivedDataLength = Client.Client.Receive(data);
             string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            string Final = stringData.Replace("%20%", " ");
 
-            return Final;
+            return JsonConvert.DeserializeObject<UniversalServerPacket>(stringData);
         }
 
         #endregion WaitForResult
 
-        #region SendCommand
-
-        public string SendCommand(string Command, string[] args)
-        {
-            for (int i = 0; i < args.Length; i++)
-            {
-                args[i] = args[i].Replace(" ", "%20%");
-            }
-            string ArgsSend = string.Join(" ", args);
-            string valueToSend = Command + " " + ArgsSend;
-            SendMessage(valueToSend);
-            return WaitForResult();
-        }
-
-        #endregion SendCommand
-
         #region SendMessage (Internal)
 
-        private string SendMessage(IUniversalPacket packet)
+        public UniversalServerPacket SendMessage(UniversalPacket packet)
         {
+            string s = packet.ToString() + "<EOF>";
             byte[] BytesToSend = Encoding.UTF8.GetBytes(packet.ToString() + "<EOF>");
             Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
             return WaitForResult();
         }
 
         #endregion SendMessage (Internal)
-
-        #region SendMessage
-
-        public void SendMessage(string Value, bool UseEncryption = true)
-        {
-            if (UseEncryption) { Value = Encryption.Encrypt(Value, Encryption.GetServerPublicKey()); }
-            UniversalPacket packet = new UniversalPacket(
-                new Header() { type = Value.GetType().ToString(), dateTime = new DateTime(), status = UniversalPacket.HTTPSTATUS.GET },
-                new Message() { IsEncrypted = UseEncryption, Data = Value },
-                new Signature() { clientId = FingerPrint.Value(), clientIp = new WebClient().DownloadString("http://icanhazip.com") });
-
-        }
-
-        #endregion SendMessage
 
         #region SendCallBack
 
