@@ -13,7 +13,7 @@ namespace Moonbyte.UniversalServer.Core.Logging
         /// </summary>
         public static void AddToLog(string Header, string Value)
         {
-            string value = "[" + DateTime.Now.ToString("HH:mm") + "] " + "[" + Header.ToUpper() + "] " + Value;
+            string value = "[" + DateTime.Now.ToString("yyyy-MM-dd | HH:mm:ssZ") + "] " + "[" + Header.ToUpper() + "] " + Value;
 
             //Check if Log is null, if it is not then makes a new line.
             if (Log != null) Log = Log + "\r\n" + value;

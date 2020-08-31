@@ -42,19 +42,23 @@ namespace Moonbyte.UniversalServer.Core.Server
                 }
             } else { Directory.CreateDirectory(PluginDirectory); }
 
-            Type interfaceType = typeof(UniversalPlugin);
+            Type interfaceType = typeof(IUniversalPlugin);
             Type[] types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => interfaceType.IsAssignableFrom(p) && p.IsClass).ToArray();
             foreach (Type type in types)
             {
                 try
                 {
-                    UniversalPlugin plugin = (UniversalPlugin)Activator.CreateInstance(type);
-                    ILogger.AddToLog("INFO", "Initializing [" + plugin.core.Name + "]");
-                    plugin.core.SetUniversalPluginAPI(plugin);
-                    plugin.core.Initialize(Path.Combine(pluginDataDirectory, plugin.core.Name), plugin);
+                    IUniversalPlugin plugin = (IUniversalPlugin)Activator.CreateInstance(type);
 
-                    returnPlugins.Add(plugin);
-                    ILogger.AddToLog("INFO", "Plugin [" + plugin.core.Name + "] Fully loaded!");
+                    UniversalPlugin pluginInstance = new UniversalPlugin(plugin);
+                    pluginInstance.core = plugin;
+
+                    ILogger.AddToLog("INFO", "Initializing [" + pluginInstance.core.Name + "]");
+                    pluginInstance.core.SetUniversalPluginAPI(pluginInstance);
+                    pluginInstance.core.Initialize(Path.Combine(pluginDataDirectory, pluginInstance.core.Name), pluginInstance);
+
+                    returnPlugins.Add(pluginInstance);
+                    ILogger.AddToLog("INFO", "Plugin [" + pluginInstance.core.Name + "] Fully loaded!");
                 }
                 catch (Exception e)
                 {

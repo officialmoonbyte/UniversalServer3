@@ -1,5 +1,6 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
 using Moonbyte.UniversalServer.Core.Networking;
+using Moonbyte.UniversalServer.Core.Server.Events;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -49,11 +50,22 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
             //Decrypts the information
             if (clientPacket.MessageData.IsEncrypted) clientPacket.MessageData.Data = workObject.Encryption.Decrypt(clientPacket.MessageData.Data, workObject.Encryption.GetServerPrivateKey());
 
+            OnBeforeClientRequestEventArgs onBeforeRequest = new OnBeforeClientRequestEventArgs { RawData = clientPacket.MessageData.Data, Client = workObject };
+            parent.GetEventTracker().OnBeforeClientRequest(this, onBeforeRequest);
+
             //Processes the command
             bool sentClientData = false;
-            using (CommandManager commandManager = new CommandManager())
+
+            if (onBeforeRequest.CancelRequest == Model.Utility.MoonbyteCancelRequest.Continue)
             {
-                sentClientData = commandManager.ProcessUniversalPacketCommand(clientPacket, workObject, workObject.serverSocket);
+                using (CommandManager commandManager = new CommandManager())
+                {
+                    sentClientData = commandManager.ProcessUniversalPacketCommand(clientPacket, workObject, workObject.serverSocket);
+                }
+            }
+            else
+            {
+                workObject.serverSocket.Send(workObject, "Unauthorized: A 3rd party software marked your request as unauthorized.", false);
             }
 
             //Sends data to client if false

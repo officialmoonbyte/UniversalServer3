@@ -183,11 +183,7 @@ namespace Moonbyte.UniversalServer.Core.Server
 
         #region GetPlugin
 
-        public UniversalPlugin GetPlugin(string pluginName)
-        {
-            return serverPlugins.FirstOrDefault(s => s.core.Name == pluginName);
-        }
-
+        public UniversalPlugin GetPlugin(string pluginName) => serverPlugins.FirstOrDefault(s => s.core.Name == pluginName);
         #endregion GetPlugin
 
         #region GetLoadedPlugins
@@ -278,6 +274,8 @@ namespace Moonbyte.UniversalServer.Core.Server
         }
 
         #endregion SendCallback
+
+        public EventTracker GetEventTracker() => this.eventTracker;
 
         public void ClientBeginReceive(ClientWorkObject workObject) => workObject.clientSocket.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, onDataReceived, workObject);
     }

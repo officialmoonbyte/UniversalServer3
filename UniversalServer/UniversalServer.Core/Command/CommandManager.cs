@@ -1,5 +1,6 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
 using Moonbyte.UniversalServer.Core.Networking;
+using Moonbyte.UniversalServer.Core.Plugin;
 using Moonbyte.UniversalServer.Core.Server;
 using Newtonsoft.Json;
 using System;
@@ -40,6 +41,11 @@ namespace UniversalServer.Core.Command
 
             string[] commandArgs = ((string[])JsonConvert.DeserializeObject<string[]>(universalPacket.MessageData.Data));
 
+            //Process plugins
+            UniversalPlugin plugin = server.GetPlugin(commandArgs[0]);
+            if (plugin != null) sentClientData = plugin.core.Invoke(client, commandArgs);
+
+            //Processes default commands
             foreach (IUniversalCommand universalCommand in UniversalCommand.GetDefaultCommands())
             {
                 if (universalCommand.GetNamespace().ToLower() == commandArgs[0].ToLower())
@@ -51,8 +57,6 @@ namespace UniversalServer.Core.Command
             }
 
             if (sentClientData) return sentClientData;
-
-            //Process plugins
 
             return sentClientData;
         }
