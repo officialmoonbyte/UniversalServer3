@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using UniversalServer.Core.Networking;
 
 namespace Moonbyte.Networking
@@ -59,13 +60,61 @@ namespace Moonbyte.Networking
 
         #endregion Intialization
 
+        #region ConnectToRemoteServerAsync
+
+        public async Task ConnectToRemoteServerAsync(string ServerIP, int ServerPort)
+        {
+            if (Client == null) return;
+
+            await Client.ConnectAsync(ServerIP, ServerPort);
+
+            if (Client.Connected)
+            {
+                UniversalPacket getServerPublicKeyRequest = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.GET },
+                    new Message { Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.getserverpublickey" }), IsEncrypted = false },
+                    clientSignature);
+                Task<UniversalServerPacket> sendMessageTask = SendMessageAsync(getServerPublicKeyRequest);
+                UniversalServerPacket s = await sendMessageTask;
+                this.Encryption.SetServerPublicKey(s.Message);
+
+                UniversalPacket sendClientPublicKey = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.POST },
+                    new Message
+                    {
+                        Data = Encryption.Encrypt(
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
+                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        IsEncrypted = true
+                    },
+                    clientSignature);
+                Task<UniversalServerPacket> sendClientPublicKeyTask = SendMessageAsync(sendClientPublicKey);
+                UniversalServerPacket bs = await sendClientPublicKeyTask;
+
+                UniversalPacket sendClientPrivateKey = new UniversalPacket(
+                    new Header { status = UniversalPacket.HTTPSTATUS.POST },
+                    new Message
+                    {
+                        Data = Encryption.Encrypt(
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
+                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        IsEncrypted = true
+                    },
+                    clientSignature);
+                Task<UniversalServerPacket> sendClientPrivateKeyTask = SendMessageAsync(sendClientPrivateKey);
+                UniversalServerPacket bs2 = await sendClientPrivateKeyTask;
+            }
+        }
+
+        #endregion ConnectToRemoteServerAsync
+
         #region ConnectToRemoteServer
 
         public void ConnectToRemoteServer(string ServerIP, int ServerPort)
         {
             if (Client == null) return;
 
-            Client.Connect(ServerIP, ServerPort);
+            Client.ConnectAsync(ServerIP, ServerPort);
 
             if (Client.Connected)
             {
@@ -78,24 +127,27 @@ namespace Moonbyte.Networking
 
                 UniversalPacket sendClientPublicKey = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
-                    new Message { 
+                    new Message
+                    {
                         Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey", 
-                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()), IsEncrypted = true },
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
+                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        IsEncrypted = true
+                    },
                     clientSignature);
                 UniversalServerPacket bs = SendMessage(sendClientPublicKey);
-                Console.WriteLine(bs.Message);
 
                 UniversalPacket sendClientPrivateKey = new UniversalPacket(
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
                         Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey", 
-                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()), IsEncrypted = true },
+                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
+                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        IsEncrypted = true
+                    },
                     clientSignature);
                 UniversalServerPacket bs2 = SendMessage(sendClientPrivateKey);
-                Console.WriteLine(bs2.Message);
             }
         }
 
@@ -147,6 +199,19 @@ namespace Moonbyte.Networking
             }
         }
 
+        public async Task<UniversalServerPacket> WaitForResultAsync()
+        {
+            string stringData = null;
+            await Task.Run(() =>
+            {
+                byte[] data = new byte[Client.Client.ReceiveBufferSize];
+                int receivedDataLength = Client.Client.Receive(data);
+                stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            });
+
+            return JsonConvert.DeserializeObject<UniversalServerPacket>(stringData);
+        }
+
         public UniversalServerPacket WaitForResult()
         {
             byte[] data = new byte[Client.Client.ReceiveBufferSize];
@@ -160,11 +225,24 @@ namespace Moonbyte.Networking
 
         #region SendMessage (Internal)
 
+        public async Task<UniversalServerPacket> SendMessageAsync(UniversalPacket packet)
+        {
+            await Task.Run(() =>
+            {
+                string s = packet.ToString() + "<EOF>";
+                byte[] BytesToSend = Encoding.UTF8.GetBytes(packet.ToString() + "<EOF>");
+                Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
+            });
+
+            return await WaitForResultAsync();
+        }
+
         public UniversalServerPacket SendMessage(UniversalPacket packet)
         {
             string s = packet.ToString() + "<EOF>";
             byte[] BytesToSend = Encoding.UTF8.GetBytes(packet.ToString() + "<EOF>");
             Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
+
             return WaitForResult();
         }
 
