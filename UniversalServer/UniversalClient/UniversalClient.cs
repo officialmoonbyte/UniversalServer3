@@ -31,21 +31,43 @@ namespace Moonbyte.Networking
         #region Vars
 
         private TcpClient Client;
-        ClientRSA Encryption;
-        Signature clientSignature;
+        private ClientRSA Encryption;
+        private Signature clientSignature;
+        private string response;
 
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
-        // The response from the remote device.
-        private static String response = String.Empty;
+        #endregion Vars
+
+        #region Properties
+
+        public Signature GetSignature
+        {
+            get 
+            { 
+                return clientSignature; 
+            }
+        }
 
         public bool IsConnected
         {
             get
-            { try { if (Client.Connected) { return true; } else { return false; } } catch { return false; } }
+            {
+                try
+                {
+                    if (Client.Connected)
+                    { return true; }
+                    else
+                    { return false; }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
 
-        #endregion Vars
+        #endregion Properties
 
         #region Initialization
 
@@ -155,50 +177,6 @@ namespace Moonbyte.Networking
 
         #region WaitForResult
 
-        public void Receive(Socket client)
-        {
-            try
-            {
-                StateObject state = new StateObject();
-                state.workSocket = client;
-
-                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-            } catch(Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        public void ReceiveCallback(IAsyncResult ar)
-        {
-            try
-            {
-                StateObject state = (StateObject)ar.AsyncState;
-                Socket client = state.workSocket;
-
-                int bytesRead = client.EndReceive(ar);
-
-                if (bytesRead > 0)
-                {
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-                }
-                else
-                {
-                    if (state.sb.Length > 1)
-                    {
-                        response = state.sb.ToString();
-                    }
-                }
-
-                receiveDone.Set();
-            } catch(Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
         public async Task<UniversalServerPacket> WaitForResultAsync()
         {
             string stringData = null;
@@ -268,7 +246,9 @@ namespace Moonbyte.Networking
 
         public void Dispose()
         {
-            
+            Client = null;
+            Encryption = null;
+            clientSignature = null;
         }
     }
 }
