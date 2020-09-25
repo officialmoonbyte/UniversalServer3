@@ -179,24 +179,38 @@ namespace Moonbyte.Networking
 
         public async Task<UniversalServerPacket> WaitForResultAsync()
         {
-            string stringData = null;
+            UniversalServerPacket serverPacket = null;
             await Task.Run(() =>
             {
                 byte[] data = new byte[Client.Client.ReceiveBufferSize];
                 int receivedDataLength = Client.Client.Receive(data);
-                stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                serverPacket = JsonConvert.DeserializeObject<UniversalServerPacket>
+                               (Encoding.ASCII.GetString(data, 0, receivedDataLength));
+
+                if (serverPacket.Encrypted)
+                {
+                    serverPacket.Message = Encryption.Decrypt(serverPacket.Message, Encryption.GetClientPrivateKey());
+                }
             });
 
-            return JsonConvert.DeserializeObject<UniversalServerPacket>(stringData);
+            return serverPacket;
         }
 
         public UniversalServerPacket WaitForResult()
         {
+            UniversalServerPacket serverPacket;
+
             byte[] data = new byte[Client.Client.ReceiveBufferSize];
             int receivedDataLength = Client.Client.Receive(data);
-            string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            serverPacket = JsonConvert.DeserializeObject<UniversalServerPacket>
+                           (Encoding.ASCII.GetString(data, 0, receivedDataLength));
 
-            return JsonConvert.DeserializeObject<UniversalServerPacket>(stringData);
+            if (serverPacket.Encrypted)
+            {
+                serverPacket.Message = Encryption.Decrypt(serverPacket.Message, Encryption.GetClientPrivateKey());
+            }
+
+            return serverPacket;
         }
 
         #endregion WaitForResult
