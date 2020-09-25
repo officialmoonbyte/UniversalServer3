@@ -58,7 +58,7 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
 
             if (onBeforeRequest.CancelRequest == Model.Utility.MoonbyteCancelRequest.Continue)
             {
-                using (CommandManager commandManager = new CommandManager())
+                using (CommandManager commandManager = new CommandManager(parent))
                 {
                     sentClientData = commandManager.ProcessUniversalPacketCommand(clientPacket, workObject, workObject.serverSocket);
                 }

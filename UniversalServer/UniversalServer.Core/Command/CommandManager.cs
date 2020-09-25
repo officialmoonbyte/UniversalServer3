@@ -24,6 +24,12 @@ namespace UniversalServer.Core.Command
     public class CommandManager : IDisposable
     {
 
+        #region Vars
+
+        private AsynchronousSocketListener parent;
+
+        #endregion Vars
+
         #region UniversalGetPacket
 
         public void ProcessUniversalGetPacketCommand(string messageData, ClientWorkObject client, AsynchronousSocketListener server)
@@ -32,6 +38,15 @@ namespace UniversalServer.Core.Command
         }
 
         #endregion UniversalGetPacket
+
+        #region Initialization
+
+        public CommandManager(AsynchronousSocketListener SocketServer)
+        {
+            parent = SocketServer;
+        }
+
+        #endregion Initialization
 
         #region UniversalPacket
 
@@ -43,21 +58,25 @@ namespace UniversalServer.Core.Command
 
             //Process plugins
             UniversalPlugin plugin = server.GetPlugin(commandArgs[0]);
-            if (plugin != null) sentClientData = plugin.core.Invoke(client, commandArgs);
-
-            //Processes default commands
-            foreach (IUniversalCommand universalCommand in UniversalCommand.GetDefaultCommands())
-            {
-                if (universalCommand.GetNamespace().ToLower() == commandArgs[0].ToLower())
-                {
-                    bool tmpbool = universalCommand.Invoke(commandArgs, universalPacket, client);
-                    server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" + universalCommand.GetNamespace() + ".");
-                    if (tmpbool == true) { sentClientData = true; return tmpbool; }
-                }
+            if (plugin != null) 
+            { 
+                sentClientData = plugin.core.Invoke(client, commandArgs);
+                server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" +plugin.core.Name + ".");
             }
 
-            if (sentClientData) return sentClientData;
-
+            //Processes default commands
+            if (!sentClientData)
+            {
+                foreach (IUniversalCommand universalCommand in UniversalCommand.GetDefaultCommands())
+                {
+                    if (universalCommand.GetNamespace().ToLower() == commandArgs[0].ToLower())
+                    {
+                        bool tmpbool = universalCommand.Invoke(commandArgs, universalPacket, client);
+                        server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" + universalCommand.GetNamespace() + ".");
+                        if (tmpbool == true) { sentClientData = true; return tmpbool; }
+                    }
+                }
+            }
             return sentClientData;
         }
 

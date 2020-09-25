@@ -16,7 +16,7 @@ namespace UniversalServer.Core.Server.Data
             if (Type.GetType(packet.MessageHeader.type) == typeof(string))
             {
                 string messageData = (string)packet.MessageData.Data;
-                using (CommandManager commandManager = new CommandManager())
+                using (CommandManager commandManager = new CommandManager(server))
                 {
                     commandManager.ProcessUniversalGetPacketCommand(messageData, client, server);
                 }

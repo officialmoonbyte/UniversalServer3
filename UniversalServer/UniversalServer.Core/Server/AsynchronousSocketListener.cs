@@ -183,7 +183,8 @@ namespace Moonbyte.UniversalServer.Core.Server
 
         #region GetPlugin
 
-        public UniversalPlugin GetPlugin(string pluginName) => serverPlugins.FirstOrDefault(s => s.core.Name == pluginName);
+        public UniversalPlugin GetPlugin(string pluginName) => serverPlugins.FirstOrDefault(s => s.core.Name.ToLower() == pluginName.ToLower());
+
         #endregion GetPlugin
 
         #region GetLoadedPlugins

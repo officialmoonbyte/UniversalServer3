@@ -136,7 +136,7 @@ namespace Moonbyte.Networking
         {
             if (Client == null) return;
 
-            Client.ConnectAsync(ServerIP, ServerPort);
+            Client.Connect(ServerIP, ServerPort);
 
             if (Client.Connected)
             {
@@ -234,6 +234,13 @@ namespace Moonbyte.Networking
         }
 
         #endregion SendCallBack
+
+        #region Encrypt
+
+        public string Encrypt(string Data) => Encryption.Encrypt(Data, Encryption.GetClientPublicKey());
+        
+
+        #endregion Encrypt
 
         #region Disconnect
 
