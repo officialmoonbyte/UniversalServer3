@@ -27,10 +27,9 @@ namespace Moonbyte.UniversalServer.Core.Networking
         #endregion Initialization
 
         #region ToString
-        public override string ToString() => JsonConvert.SerializeObject(MessageHeader) + SplitString 
-            + JsonConvert.SerializeObject(MessageData) + SplitString 
-            + JsonConvert.SerializeObject(MessageSignature) + SplitString 
-            + MessageData.IsEncrypted.ToString();
+        public override string ToString() => JsonConvert.SerializeObject(MessageHeader) + SplitString
+            + JsonConvert.SerializeObject(MessageData) + SplitString
+            + JsonConvert.SerializeObject(MessageSignature);
 
         public string GetSplitString() => SplitString;
         #endregion ToString

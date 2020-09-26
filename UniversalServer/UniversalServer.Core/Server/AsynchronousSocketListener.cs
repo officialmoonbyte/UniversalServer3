@@ -1,6 +1,5 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
 using Moonbyte.UniversalServer.Core.Logging;
-using Moonbyte.UniversalServer.Core.Model;
 using Moonbyte.UniversalServer.Core.Plugin;
 using Moonbyte.UniversalServer.Core.Server.Data;
 using Moonbyte.UniversalServer.Plugin.Module;
@@ -15,6 +14,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UniversalServer.Core.Networking;
+using Utility = Moonbyte.UniversalServer.Core.Model.Utility;
 
 namespace Moonbyte.UniversalServer.Core.Server
 {
@@ -175,7 +175,7 @@ namespace Moonbyte.UniversalServer.Core.Server
             catch (Exception e)
             {
                 ILogger.LogExceptions(e);
-                workObject.Dispose();
+                workObject.clientSender.Send(workObject, "error");
             }
         }
 

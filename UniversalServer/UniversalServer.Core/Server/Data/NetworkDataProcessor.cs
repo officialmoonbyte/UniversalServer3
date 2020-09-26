@@ -46,7 +46,7 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
                                                         ((IPEndPoint)workObject.clientSocket.RemoteEndPoint).Address.ToString(), 
                                                         clientPacket.MessageSignature.clientIp);
             clientPacket.MessageHeader.dateTime = DateTime.Now; //Sets the datetime if its null
-
+            string s = workObject.Encryption.GetServerPrivateKey();
             //Decrypts the information
             if (clientPacket.MessageData.IsEncrypted) clientPacket.MessageData.Data = workObject.Encryption.Decrypt(clientPacket.MessageData.Data, workObject.Encryption.GetServerPrivateKey());
 
@@ -65,11 +65,11 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
             }
             else
             {
-                workObject.serverSocket.Send(workObject, "Unauthorized: A 3rd party software marked your request as unauthorized.", false);
+                workObject.serverSocket.Send(workObject, "Unauthorized", false);
             }
 
             //Sends data to client if false
-            if (!sentClientData) workObject.serverSocket.Send(workObject, "Unknown Command!", false);
+            if (!sentClientData) workObject.serverSocket.Send(workObject, "UnknownCommand", false);
         }
 
         private IUniversalPacket getUniversalPacket(string[] dataReceived)
@@ -77,7 +77,6 @@ namespace Moonbyte.UniversalServer.Core.Server.Data
             if (dataReceived == null) return null;
             Header header = JsonConvert.DeserializeObject<Header>(dataReceived[0]);
             Message message = JsonConvert.DeserializeObject<Message>(dataReceived[1]);
-            message.IsEncrypted = bool.Parse(dataReceived[3]);
             Signature signature = JsonConvert.DeserializeObject<Signature>(dataReceived[2]);
 
             return new UniversalPacket(header, message, signature);

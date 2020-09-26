@@ -9,18 +9,40 @@ namespace UniversalClientTest
 {
     class Program
     {
+        static string serverIP = "127.0.0.1";
+        static int serverPort = 7876;
+
         static async Task Main(string[] args)
         {
-            UniversalClient client = new UniversalClient();
-            client.ConnectToRemoteServer("127.0.0.1", 7876);
+            UniversalClient _client = GetUniversalClient();
 
-            UniversalPacket updateCheck = new UniversalPacket(
+            string valueTitle = "VermeerVersion";
+
+            UniversalPacket getValueCommand = new UniversalPacket(
                 new Header() { status = UniversalPacket.HTTPSTATUS.GET },
-                new Message() { Data = JsonConvert.SerializeObject(new string[] { "userdatabase", "getvalue", "VermeerCurrentVersion" }), IsEncrypted = false },
-                client.GetSignature);
-            UniversalServerPacket LatestVersion = client.SendMessage(updateCheck);
+                new Message() { Data = JsonConvert.SerializeObject(new string[] { "userdatabase", "getvalue", valueTitle }), IsEncrypted = true },
+                _client.GetSignature);
+            UniversalServerPacket serverReturn = _client.SendMessage(getValueCommand);
 
-            Console.Read();
+            switch (serverReturn.Message.ToUpper())
+            {
+                case "UNAUTHORIZED":
+                    break;
+                case "UNKNOWNCOMMAND":
+                    break;
+                case "USRDBS_GETVALUE_VALUEEXIST":
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static UniversalClient GetUniversalClient()
+        {
+            UniversalClient client = new UniversalClient();
+            client.ConnectToRemoteServer(serverIP, serverPort);
+
+            return client;
         }
     }
 }

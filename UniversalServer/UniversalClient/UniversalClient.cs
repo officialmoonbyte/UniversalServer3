@@ -104,9 +104,8 @@ namespace Moonbyte.Networking
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
-                        Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
-                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
+                        Encryption.GetClientPublicKey() }, Formatting.None),
                         IsEncrypted = true
                     },
                     clientSignature);
@@ -117,9 +116,8 @@ namespace Moonbyte.Networking
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
-                        Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
-                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
+                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None),
                         IsEncrypted = true
                     },
                     clientSignature);
@@ -151,9 +149,8 @@ namespace Moonbyte.Networking
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
-                        Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
-                        Encryption.GetClientPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientpublickey",
+                        Encryption.GetClientPublicKey() }, Formatting.None),
                         IsEncrypted = true
                     },
                     clientSignature);
@@ -163,9 +160,8 @@ namespace Moonbyte.Networking
                     new Header { status = UniversalPacket.HTTPSTATUS.POST },
                     new Message
                     {
-                        Data = Encryption.Encrypt(
-                        JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
-                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None), Encryption.GetServerPublicKey()),
+                        Data = JsonConvert.SerializeObject(new string[] { "serverrequest.encryption.setclientprivatekey",
+                        Encryption.GetClientPrivateKey(), Encryption.GetServerPublicKey() }, Formatting.None),
                         IsEncrypted = true
                     },
                     clientSignature);
@@ -205,6 +201,9 @@ namespace Moonbyte.Networking
             serverPacket = JsonConvert.DeserializeObject<UniversalServerPacket>
                            (Encoding.ASCII.GetString(data, 0, receivedDataLength));
 
+            if (serverPacket == null)
+            { throw new Exception("Server packet is null!"); }
+
             if (serverPacket.Encrypted)
             {
                 serverPacket.Message = Encryption.Decrypt(serverPacket.Message, Encryption.GetClientPrivateKey());
@@ -231,6 +230,8 @@ namespace Moonbyte.Networking
 
         public UniversalServerPacket SendMessage(UniversalPacket packet)
         {
+            if (packet.MessageData.IsEncrypted) packet.MessageData.Data = this.Encrypt(packet.MessageData.Data);
+
             string s = packet.ToString() + "<EOF>";
             byte[] BytesToSend = Encoding.UTF8.GetBytes(packet.ToString() + "<EOF>");
             Client.Client.BeginSend(BytesToSend, 0, BytesToSend.Length, 0, new AsyncCallback(SendCallBack), Client);
@@ -251,7 +252,7 @@ namespace Moonbyte.Networking
 
         #region Encrypt
 
-        public string Encrypt(string Data) => Encryption.Encrypt(Data, Encryption.GetClientPublicKey());
+        public string Encrypt(string Data) => Encryption.Encrypt(Data, Encryption.GetServerPublicKey());
         
 
         #endregion Encrypt

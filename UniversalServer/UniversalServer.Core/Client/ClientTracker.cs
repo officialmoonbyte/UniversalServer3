@@ -14,7 +14,7 @@ namespace Moonbyte.UniversalServer.Core.Client
         public string userID;
         public string userServerEndPoint;
         public string userClientEndPoint;
-        public MSMVault ClientStorage = new MSMVault();
+        public MSMVault ClientStorage;
 
         private bool isLoggedIn = false;
         private string[] Seperators = new string[] { "%80%" };
@@ -30,8 +30,9 @@ namespace Moonbyte.UniversalServer.Core.Client
         #region Directories
 
         public string UserDirectory;
+        public string UserKeyFile;
 
-        private string UserDirectories;
+        private string userDirectories;
 
         #endregion Directories
 
@@ -47,11 +48,11 @@ namespace Moonbyte.UniversalServer.Core.Client
 
         #region Initialize
 
-        public ClientTracker(string ServerName)
+        public ClientTracker(string serverName)
         {
-            UserDirectories = Environment.CurrentDirectory + @"\Servers\" + ServerName + @"\Users";
-
-            if (!Directory.Exists(UserDirectories)) Directory.CreateDirectory(UserDirectories);
+            userDirectories = Path.Combine(Environment.CurrentDirectory, "Servers", serverName, "Users");
+            
+            if (!Directory.Exists(userDirectories)) Directory.CreateDirectory(userDirectories);
         }
 
         #endregion Initialize
@@ -64,7 +65,10 @@ namespace Moonbyte.UniversalServer.Core.Client
             userServerEndPoint = UserServerEndPoint;
             userClientEndPoint = UserClientEndPoint;
 
-            UserDirectory = UserDirectories + @"\" + userID;
+            UserDirectory = Path.Combine(userDirectories, userID);
+            UserKeyFile = Path.Combine(UserDirectory, "key.key");
+
+            ClientStorage = new MSMVault(UserKeyFile);
 
             if (!Directory.Exists(UserDirectory)) Directory.CreateDirectory(UserDirectory);
 
