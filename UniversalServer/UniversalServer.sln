@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalServer.Core", "Uni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventTestPlugin", "EventTestPlugin\EventTestPlugin.csproj", "{AC8524E0-B28A-4A0A-9C9E-8B4774179325}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{C2BA60D1-372D-44C7-A567-A563AE4511B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalServerWebUI", "UniversalServerWebUI\UniversalServerWebUI.csproj", "{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +57,10 @@ Global
 		{AC8524E0-B28A-4A0A-9C9E-8B4774179325}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC8524E0-B28A-4A0A-9C9E-8B4774179325}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC8524E0-B28A-4A0A-9C9E-8B4774179325}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +73,7 @@ Global
 		{31F112C4-4835-4A2B-8F75-0AE87D570941} = {6618C449-D980-4C68-B216-00E187E026FA}
 		{8B15417F-6AA2-4908-823A-811E25123539} = {5EB189C3-5182-4930-B626-1CEBAAA9B7A8}
 		{AC8524E0-B28A-4A0A-9C9E-8B4774179325} = {31F112C4-4835-4A2B-8F75-0AE87D570941}
+		{8DFD4F84-430E-4A59-AEFC-F5144F4B14E6} = {C2BA60D1-372D-44C7-A567-A563AE4511B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93555421-001B-4CC7-AD4A-1743444498AC}
