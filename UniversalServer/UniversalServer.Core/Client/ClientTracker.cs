@@ -68,13 +68,14 @@ namespace Moonbyte.UniversalServer.Core.Client
             UserDirectory = Path.Combine(userDirectories, userID);
             UserKeyFile = Path.Combine(UserDirectory, "key.key");
 
-            ClientStorage = new MSMVault(UserKeyFile);
-
             if (!Directory.Exists(UserDirectory)) Directory.CreateDirectory(UserDirectory);
 
-            ClientStorage.ShowLog = false;
-            ClientStorage.SettingsFileName = "UserData.dat";
-            ClientStorage.SettingsDirectory = UserDirectory;
+            ClientStorage = new MSMVault(UserKeyFile) 
+            { 
+                ShowLog = false,
+                SettingsFileName = "UserData.dat",
+                SettingsDirectory = UserDirectory
+            };
 
             this.IsLoggedIn = true;
 

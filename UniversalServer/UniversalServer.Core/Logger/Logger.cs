@@ -8,6 +8,16 @@ namespace Moonbyte.UniversalServer.Core.Logging
         //Generating a new string for the log file.
         public static string Log;
 
+        public ILogger()
+        {
+            //Get the execution directory
+            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            if (File.Exists(Path.Combine(exeDirectory, "Log.log")))
+            {
+                Log = File.ReadAllText(Path.Combine(exeDirectory, "Log.log"));
+            }
+        }
+
         /// <summary>
         /// Used to add a value to the log string.
         /// </summary>

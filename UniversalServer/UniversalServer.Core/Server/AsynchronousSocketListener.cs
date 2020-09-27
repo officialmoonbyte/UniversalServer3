@@ -200,15 +200,23 @@ namespace Moonbyte.UniversalServer.Core.Server
 
         public void Send(ClientWorkObject workObject, string data, bool useEncryption = true)
         {
-            UniversalServerPacket serverPacket = new UniversalServerPacket
+            try
             {
-                Encrypted = useEncryption,
-                Message = data
-            };
+                UniversalServerPacket serverPacket = new UniversalServerPacket
+                {
+                    Encrypted = useEncryption,
+                    Message = data
+                };
 
-            if (useEncryption) { serverPacket.Message = workObject.Encryption.Encrypt(data, workObject.Encryption.GetClientPublicKey()); }
+                if (useEncryption) { serverPacket.Message = workObject.Encryption.Encrypt(data, workObject.Encryption.GetClientPublicKey()); }
 
-            workObject.clientSocket.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(serverPacket)));
+                workObject.clientSocket.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(serverPacket)));
+            }
+            catch (Exception e)
+            {
+                ILogger.LogExceptions(e);
+                workObject.Dispose();
+            }
         }
 
         #endregion Send
