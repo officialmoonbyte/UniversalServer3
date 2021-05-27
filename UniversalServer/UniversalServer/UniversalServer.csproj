@@ -90,7 +90,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commandline\Commandline.cs" />
-    <Compile Include="Commandline\ConsoleCommands.cs" />
+    <Compile Include="Commandline\ConsoleCommands\CreateServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\InvokeConsoleCommand.cs" />
+    <Compile Include="Commandline\ConsoleCommands\ListServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\StartServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\StopServer.cs" />
+    <Compile Include="Handlers\CommandHandler.cs" />
+    <Compile Include="Interfaces\ICommandInvoker.cs" />
+    <Compile Include="Interfaces\IConsoleCommand.cs" />
+    <Compile Include="Invokers\DefaultCommandInvoker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UniversalServer\Universalserver.cs" />
@@ -119,5 +127,6 @@
       <Name>UniversalServer.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

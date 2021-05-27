@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UniversalServer.Commandline;
+using UniversalServer.Handlers;
 
 namespace UniversalServer
 {
@@ -14,6 +15,7 @@ namespace UniversalServer
         #region Vars
 
         public static MSMCore SettingsManager = new MSMCore();
+        public static CommandHandler CommandHandler = new CommandHandler();
         public static List<AsynchronousSocketListener> TcpServers = new List<AsynchronousSocketListener>();
 
         #endregion Vars
@@ -73,35 +75,7 @@ namespace UniversalServer
         //Help
 
         public static void ProcessCommand(string[] Args)
-        {
-            string Command = Args[0].ToUpper();
-
-            try
-            {
-                // CreateServer, Create [ServerName]
-                if (Command == "CREATESERVER" || Command == "CREATE")
-                { ConsoleCommands.CreateServer(Args[1]); }
-                //ListServers, ListServer, List
-                if (Command == "LISTSERVERS" || Command == "LISTSERVER" || Command == "LIST")
-                { ConsoleCommands.ListServer(); }
-                //StartServer, StartServers, Start
-                if (Command == "STARTSERVER" || Command == "STARTSERVERS" || Command == "START")
-                { ConsoleCommands.StartServer(Args[1]); }
-                //StopServer, Dispose, Stop, StopServers
-                if (Command == "STOPSERVER" || Command=="STOPSERVERS" || Command == "DISPOSE" || Command == "STOP")
-                { ConsoleCommands.StopServer(Args[1]); }
-                if (Command == "INVOKE" || Command == "INVOKECOMMAND" || Command == "INVOKECONSOLECOMMAND")
-                {
-                    List<string> tempArray = new List<string>(Args);
-                    tempArray.RemoveAt(0); tempArray.RemoveAt(0);
-
-                    ConsoleCommands.InvokeConsoleCommand(Args[1], tempArray.ToArray());
-                }
-            }
-            catch (Exception e)
-            { ILogger.LogExceptions(e); }
-
-        }
+            => CommandHandler.HandleCommand(Args);
 
         #endregion ProcessCommand
 
