@@ -1,8 +1,9 @@
 ﻿using Moonbyte.UniversalServer.Core.Logging;
-using Moonbyte.UniversalServer.Core.Server;
+using Moonbyte.UniversalServer.Core.Model;
 using System.Collections.Generic;
-using UniversalServer.Interfaces;
+using System.Linq;
 using UniversalServer.Core.Globalization;
+using UniversalServer.Interfaces;
 
 namespace UniversalServer.Commandline.ConsoleCommands
 {
@@ -19,6 +20,12 @@ namespace UniversalServer.Commandline.ConsoleCommands
             return activeStrings;
         }
 
+        public (string, string) GetHelpCommandLog()
+            => ("Invoke [ServerName]", "Invokes a command on the server.");
+
+        public string GetName()
+            => "InvokeConsoleCommand";
+
         public void RunCommand(string[] args)
         {
             List<string> tempArray = new List<string>(args);
@@ -26,19 +33,14 @@ namespace UniversalServer.Commandline.ConsoleCommands
 
             var serverName = args[1];
 
-
-            bool found = false; foreach (AsynchronousSocketListener listener in Universalserver.TcpServers)
+            var universalServer = Universalserver.TcpServers.FirstOrDefault(x => Utility.EqualsIgnoreCase(x.ServerName, serverName));
+            if (universalServer != null)
             {
-                if (listener.ServerName == serverName)
-                {
-                    found = true;
-
-                    listener.ConsolePluginInvoke(tempArray.ToArray());
-
-                    break;
-                }
+                universalServer.ConsolePluginInvoke(tempArray.ToArray());
+                return;
             }
-            if (!found) { ILogger.AddToLog(Messages.ConsoleCommands.CouldntfindServer[0], Messages.ConsoleCommands.CouldntfindServer[1] + serverName + Messages.ConsoleCommands.CouldntfindServer[2]); }
+
+            ILogger.AddToLog(Messages.ConsoleCommands.CouldntfindServer[0], Messages.ConsoleCommands.CouldntfindServer[1] + serverName + Messages.ConsoleCommands.CouldntfindServer[2]); 
         }
     }
 }

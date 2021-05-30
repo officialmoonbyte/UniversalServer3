@@ -4,6 +4,6 @@ namespace UniversalServer.Interfaces
 {
     public interface ICommandInvoker
     {
-        List<IConsoleCommand> ConstructConsoleCommands();
+        (List<IConsoleCommand>, List<string>) ConstructConsoleCommands();
     }
 }

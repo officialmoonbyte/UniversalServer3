@@ -6,7 +6,7 @@ namespace UniversalServer.Invokers
 {
     public class DefaultCommandInvoker : ICommandInvoker
     {
-        public List<IConsoleCommand> ConstructConsoleCommands()
+        public (List<IConsoleCommand>, List<string>) ConstructConsoleCommands()
         {
             var commands = new List<IConsoleCommand>();
 
@@ -15,8 +15,11 @@ namespace UniversalServer.Invokers
             commands.Add(new ListServer());
             commands.Add(new StartServer());
             commands.Add(new StopServer());
+            commands.Add(new Help());
+            commands.Add(new UPD());
+            commands.Add(new DeleteServer());
 
-            return commands;
+            return (commands, new List<string>());
         }
     }
 }

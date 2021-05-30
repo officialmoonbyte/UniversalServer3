@@ -11,6 +11,7 @@ namespace UniversalServer.Handlers
         #region Vars
 
         private List<IConsoleCommand> consoleCommands = new List<IConsoleCommand>();
+        private List<string> registeredConsoleCommands = new List<string>();
 
         #endregion Vars
 
@@ -21,7 +22,10 @@ namespace UniversalServer.Handlers
             // Default Commands
             var defaultCommandInvoker = new DefaultCommandInvoker();
 
-            consoleCommands = defaultCommandInvoker.ConstructConsoleCommands();
+            var constructedDefaultCommands = defaultCommandInvoker.ConstructConsoleCommands();
+
+            consoleCommands = constructedDefaultCommands.Item1;
+            registeredConsoleCommands = constructedDefaultCommands.Item2;
         }
 
         #endregion Constructor
@@ -39,5 +43,11 @@ namespace UniversalServer.Handlers
         }
 
         #endregion HandleCommand
+
+        #region GetCommands
+
+        public List<IConsoleCommand> GetCommands() => consoleCommands;
+
+        #endregion GetCommands
     }
 }

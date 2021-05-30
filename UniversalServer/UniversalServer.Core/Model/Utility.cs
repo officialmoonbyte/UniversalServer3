@@ -35,5 +35,7 @@ namespace Moonbyte.UniversalServer.Core.Model
 
             return returnStringArray;
         }
+        public static bool EqualsIgnoreCase(string str1, string str2)
+            => str1.Equals(str2, StringComparison.OrdinalIgnoreCase);
     }
 }

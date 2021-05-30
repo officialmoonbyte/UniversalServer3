@@ -64,23 +64,21 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>0CC48D5B63CF310DF1581B7201724A6A2449B0CF</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>UniversalServer_TemporaryKey.pfx</ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MoonbyteSettingsManager, Version=2.5.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MSM.2.5.2\lib\net45\MoonbyteSettingsManager.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Pastel, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pastel.2.1.0\lib\netstandard2.0\Pastel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -91,10 +89,13 @@
   <ItemGroup>
     <Compile Include="Commandline\Commandline.cs" />
     <Compile Include="Commandline\ConsoleCommands\CreateServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\DeleteServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\Help.cs" />
     <Compile Include="Commandline\ConsoleCommands\InvokeConsoleCommand.cs" />
     <Compile Include="Commandline\ConsoleCommands\ListServer.cs" />
     <Compile Include="Commandline\ConsoleCommands\StartServer.cs" />
     <Compile Include="Commandline\ConsoleCommands\StopServer.cs" />
+    <Compile Include="Commandline\ConsoleCommands\UPD.cs" />
     <Compile Include="Handlers\CommandHandler.cs" />
     <Compile Include="Interfaces\ICommandInvoker.cs" />
     <Compile Include="Interfaces\IConsoleCommand.cs" />
@@ -107,7 +108,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
-    <None Include="UniversalServer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

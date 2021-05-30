@@ -70,10 +70,6 @@ namespace UniversalServer
 
         #region ProcessCommand
 
-        //CreateServer
-        //List
-        //Help
-
         public static void ProcessCommand(string[] Args)
             => CommandHandler.HandleCommand(Args);
 

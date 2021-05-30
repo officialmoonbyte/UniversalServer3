@@ -35,6 +35,7 @@ namespace Moonbyte.UniversalServer.Core.Server
         //AsynchronousWebSocketListener webServer;
 
         public string ServerName;
+        public bool IsListening { get; set; }
         public Logger serverPluginLogger = new Logger();
         public int Port;
         public ManualResetEvent allDone = new ManualResetEvent(false);
@@ -72,6 +73,7 @@ namespace Moonbyte.UniversalServer.Core.Server
             ServerName = serverName;
             eventTracker = new EventTracker(this);
             networkDataProcessor = new NetworkDataProcessor(this);
+            IsListening = false;
             ServerDirectory = Path.Combine(Environment.CurrentDirectory, "Servers", ServerName);
             PluginDirectory = Path.Combine(ServerDirectory, "Plugins");;
 
@@ -136,6 +138,8 @@ namespace Moonbyte.UniversalServer.Core.Server
             serverlistener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverlistener.Bind(new IPEndPoint(IPAddress.Any, Port));
             serverlistener.Listen(200);
+
+            IsListening = true;
             serverlistener.BeginAccept(onSocketAccepted, null);
         }
 

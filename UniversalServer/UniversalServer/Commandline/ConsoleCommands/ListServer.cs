@@ -1,6 +1,6 @@
 ﻿using Moonbyte.UniversalServer.Core.Logging;
-using Moonbyte.UniversalServer.Core.Server;
 using System.Collections.Generic;
+using System.Linq;
 using UniversalServer.Interfaces;
 
 namespace UniversalServer.Commandline.ConsoleCommands
@@ -18,12 +18,21 @@ namespace UniversalServer.Commandline.ConsoleCommands
             return activeStrings;
         }
 
+        public (string, string) GetHelpCommandLog()
+            => ("List", "Displays all of the servers information and status.");
+
+        public string GetName()
+            => "ListServer";
         public void RunCommand(string[] args)
         {
-            foreach (AsynchronousSocketListener socketListener in Universalserver.TcpServers)
-            { ILogger.AddToLog("INFO", socketListener.ServerName + " : Online : , Clients Connected : " + socketListener.Clients); }
+            Universalserver.TcpServers.OrderBy(x => x.ServerName).ToList().ForEach(x =>
+            {
+                string onlineText = "Online!";
 
-            ILogger.AddWhitespace();
+                if (!x.IsListening) onlineText = "Offline!";
+
+                ILogger.AddToLog("INFO", $"{x.ServerName} : Status : {onlineText}  Clients Connected : {x.Clients}");
+            });
         }
     }
 }

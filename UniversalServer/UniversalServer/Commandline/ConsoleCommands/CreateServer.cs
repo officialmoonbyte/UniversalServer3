@@ -1,7 +1,11 @@
 ﻿using Moonbyte.UniversalServer.Core.Logging;
 using Moonbyte.UniversalServer.Core.Server;
+using Moonbyte.UniversalServer.Core.Model;
 using System.Collections.Generic;
 using UniversalServer.Interfaces;
+using System.Linq;
+using System.Drawing;
+using Pastel;
 
 namespace UniversalServer.Commandline.ConsoleCommands
 {
@@ -17,9 +21,22 @@ namespace UniversalServer.Commandline.ConsoleCommands
             return activeStrings;
         }
 
+        public (string, string) GetHelpCommandLog()
+            => ("Createserver [ServerName]", "Creates a new server in Universal Server.");
+
+        public string GetName()
+            => "CreateServer";
+
         public void RunCommand(string[] args)
         {
             string serverName = args[1];
+
+            var universalServer = Universalserver.TcpServers.FirstOrDefault(x => Utility.EqualsIgnoreCase(x.ServerName, serverName));
+            if (universalServer != null)
+            {
+                ILogger.AddToLog("ERROR", "Error while trying to create a server! Server already exists!");
+                return;
+            }
 
             //Initializes the server and creates the server
             AsynchronousSocketListener serverListener = new AsynchronousSocketListener(serverName);
