@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UniversalServer.Core.Globalization;
 using UniversalServer.Interfaces;
+using static Moonbyte.UniversalServer.Core.Logging.ILogger;
 
 namespace UniversalServer.Commandline.ConsoleCommands
 {
@@ -33,11 +34,12 @@ namespace UniversalServer.Commandline.ConsoleCommands
             var universalServer = Universalserver.TcpServers.FirstOrDefault(x => Utility.EqualsIgnoreCase(x.ServerName, serverName));
             if (universalServer == null)
             {
-                ILogger.AddToLog(Messages.ConsoleCommands.CantFindServer[0], Messages.ConsoleCommands.CantFindServer[1] + serverName + Messages.ConsoleCommands.CantFindServer[2]);
+                ILogger.AddToLog(Levels.FATAL, Messages.ConsoleCommands.CantFindServer[1] + serverName + Messages.ConsoleCommands.CantFindServer[2]);
+                return;
             }
 
             universalServer.Dispose();
-            ILogger.AddToLog(Messages.ConsoleCommands.DisposeCallNotification[0], Messages.ConsoleCommands.DisposeCallNotification[1] + serverName);
+            ILogger.AddToLog(Levels.INFO, Messages.ConsoleCommands.DisposeCallNotification[1] + serverName);
         }
     }
 }

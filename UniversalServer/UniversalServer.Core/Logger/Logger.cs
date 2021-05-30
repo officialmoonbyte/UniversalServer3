@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using static Crayon.Output;
 
 namespace Moonbyte.UniversalServer.Core.Logging
 {
     public class ILogger
     {
+        public enum Levels { TRACE, DEBUG, INFO, WARN, ERROR, FATAL }
         //Generating a new string for the log file.
         public static string Log;
 
@@ -21,18 +23,42 @@ namespace Moonbyte.UniversalServer.Core.Logging
         /// <summary>
         /// Used to add a value to the log string.
         /// </summary>
-        public static void AddToLog(string Header, string Value)
+        public static void AddToLog(Levels level, string value)
         {
-            string value = "[" + DateTime.Now.ToString("yyyy-MM-dd | HH:mm:ssZ") + "] " + "[" + Header.ToUpper() + "] " + Value;
+            string header = "info";
+
+            switch (level)
+            {
+                case Levels.TRACE:
+                    header = Yellow(Bold("TRACE"));
+                    break;
+                case Levels.DEBUG:
+                    header = Bold("DEBUG");
+                    break;
+                case Levels.INFO:
+                    header = Cyan(Bold("INFO"));
+                    break;
+                case Levels.WARN:
+                    header = Yellow(Bold("WARN"));
+                    break;
+                case Levels.ERROR:
+                    header = Red(Bold("ERROR"));
+                    break;
+                case Levels.FATAL:
+                    header = Red(Bold("FATAL"));
+                    break;
+            }
+
+            string newValue = $"[{DateTime.Now.ToString("yyyy-MM-dd | HH:mm:ssZ")}] [{header}] {value}";
 
             //Check if Log is null, if it is not then makes a new line.
-            if (Log != null) Log = Log + "\r\n" + value;
+            if (Log != null) Log = Log + "\r\n" + newValue;
 
             //Cehck if log is null, if it is then set log to value
-            if (Log == null) Log = value;
+            if (Log == null) Log = newValue;
 
             //Prints value in console
-            Console.WriteLine(value);
+            Console.WriteLine(newValue);
         }
 
         /// <summary>
@@ -56,13 +82,13 @@ namespace Moonbyte.UniversalServer.Core.Logging
             {
                 UnhandledExceptionEventArgs e = args;
 
-                ILogger.AddToLog("Current Domain Error", "Error with App Domain");
+                ILogger.AddToLog(Levels.FATAL, "Error with App Domain");
 
                 Exception ex = (Exception)e.ExceptionObject;
 
-                ILogger.AddToLog("Current Domain", "Message : " + ex.Message);
-                ILogger.AddToLog("Current Domain Error", "StackTrace : " + ex.StackTrace);
-                ILogger.AddToLog("Current Domain Error", "Source : " + ex.Source);
+                ILogger.AddToLog(Levels.FATAL, "Message : " + ex.Message);
+                ILogger.AddToLog(Levels.TRACE, "StackTrace : " + ex.StackTrace);
+                ILogger.AddToLog(Levels.TRACE, "Source : " + ex.Source);
 
                 ILogger.WriteLog();
             });
@@ -97,8 +123,8 @@ namespace Moonbyte.UniversalServer.Core.Logging
 
         public static void LogExceptions(Exception e)
         {
-            ILogger.AddToLog("INFO", e.Message);
-            ILogger.AddToLog("INFO", e.StackTrace);
+            ILogger.AddToLog(Levels.INFO, e.Message);
+            ILogger.AddToLog(Levels.INFO, e.StackTrace);
         }
 
     }

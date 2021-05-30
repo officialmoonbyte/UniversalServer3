@@ -32,12 +32,12 @@ namespace UniversalServer.Commandline.ConsoleCommands
             var universalServer = Universalserver.TcpServers.FirstOrDefault(x => Utility.EqualsIgnoreCase(x.ServerName, serverName));
             if (universalServer == null)
             {
-                ILogger.AddToLog(Messages.ConsoleCommands.CantFindServer[0], Messages.ConsoleCommands.CantFindServer[1] + serverName + Messages.ConsoleCommands.CantFindServer[2]);
+                ILogger.AddToLog(ILogger.Levels.FATAL, Messages.ConsoleCommands.CantFindServer[1] + serverName + Messages.ConsoleCommands.CantFindServer[2]);
                 return;
             }
 
             universalServer.StartListening();
-            ILogger.AddToLog("INFO", serverName + Messages.ConsoleCommands.ServerStartedNotification[1] + universalServer.Port);
+            ILogger.AddToLog(ILogger.Levels.INFO, serverName + Messages.ConsoleCommands.ServerStartedNotification[1] + universalServer.Port);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Moonbyte.UniversalServer.Plugin.Module;
 using System.Collections.Generic;
 using UniversalServer.Interfaces;
+using static Moonbyte.UniversalServer.Core.Logging.ILogger;
 
 namespace UniversalServer.Commandline.ConsoleCommands
 {
@@ -32,7 +33,7 @@ namespace UniversalServer.Commandline.ConsoleCommands
             {
                 var commandLog = x.GetHelpCommandLog();
 
-                ILogger.AddToLog("INFO", $"{commandLog.Item1} - {commandLog.Item2}");
+                ILogger.AddToLog(Levels.INFO, $"{commandLog.Item1} - {commandLog.Item2}");
             });
             ILogger.AddWhitespace();
         }

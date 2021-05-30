@@ -152,7 +152,7 @@ namespace Moonbyte.UniversalServer.Core.Server
             // This is the client socket, where you send/receive data from after accepting. Keep it in a List<Socket> collection if you need to.
             Socket client = serverlistener.EndAccept(result);
 
-            ILogger.AddToLog("INFO", "Accepted client endpoint [" + client.RemoteEndPoint + "]");
+            ILogger.AddToLog(ILogger.Levels.INFO, "Accepted client endpoint [" + client.RemoteEndPoint + "]");
 
             ClientWorkObject workObject = new ClientWorkObject(client, this);
             client.BeginReceive(workObject.buffer, 0, workObject.buffer.Length, SocketFlags.None, onDataReceived, workObject);
@@ -242,16 +242,16 @@ namespace Moonbyte.UniversalServer.Core.Server
                         }
                         catch (Exception e)
                         {
-                            ILogger.AddToLog("WARN", "Exception occured while executing a Console Plugin Command!");
+                            ILogger.AddToLog(ILogger.Levels.WARN, "Exception occured while executing a Console Plugin Command!");
                             ILogger.LogExceptions(e);
                         }
                         break; 
                     } 
                 }
             }
-            else { ILogger.AddToLog("INFO", "Plugins hasn't been loaded in the appdomain yet! Please load them by starting the server."); }
+            else { ILogger.AddToLog(ILogger.Levels.INFO, "Plugins hasn't been loaded in the appdomain yet! Please load them by starting the server."); }
             
-            if (!found) { ILogger.AddToLog("INFO", "Couldn't find plugin [" + args[0] + "] please make sure that plugin is installed and loaded! "); }
+            if (!found) { ILogger.AddToLog(ILogger.Levels.INFO, "Couldn't find plugin [" + args[0] + "] please make sure that plugin is installed and loaded! "); }
         }
 
         #endregion ConsoleInvoke

@@ -8,8 +8,8 @@ namespace Moonbyte.UniversalServer.Plugin.Module
     /// </summary>
     public class Logger
     {
-        public void AddToLog(string Header, string Value)
-        { ILogger.AddToLog(Header, Value); }
+        public void AddToLog(ILogger.Levels level, string value)
+        { ILogger.AddToLog(level, value); }
 
         public void AddWhitespace()
         { ILogger.AddWhitespace(); }

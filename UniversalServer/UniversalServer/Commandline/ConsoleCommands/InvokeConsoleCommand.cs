@@ -40,7 +40,7 @@ namespace UniversalServer.Commandline.ConsoleCommands
                 return;
             }
 
-            ILogger.AddToLog(Messages.ConsoleCommands.CouldntfindServer[0], Messages.ConsoleCommands.CouldntfindServer[1] + serverName + Messages.ConsoleCommands.CouldntfindServer[2]); 
+            ILogger.AddToLog(ILogger.Levels.FATAL, Messages.ConsoleCommands.CouldntfindServer[1] + serverName + Messages.ConsoleCommands.CouldntfindServer[2]); 
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static Moonbyte.UniversalServer.Core.Logging.ILogger;
 
 namespace Moonbyte.UniversalServer.Core.Client
 {
@@ -93,7 +94,7 @@ namespace Moonbyte.UniversalServer.Core.Client
                 ClientStorage.EditSetting(_UserLoginDates, newData);
             }
 
-            ILogger.AddToLog("INFO", "Client [" + userServerEndPoint + "] has logged in with ID [" + userID + "]");
+            ILogger.AddToLog(Levels.INFO, "Client [" + userServerEndPoint + "] has logged in with ID [" + userID + "]");
         }
 
         #endregion SetID
@@ -116,7 +117,7 @@ namespace Moonbyte.UniversalServer.Core.Client
                 ClientStorage.EditSetting(_UserDisconnectedDates, newData);
             }
 
-            ILogger.AddToLog("INFO", "Client [" + userServerEndPoint + "] has disconnected with id [" + userID + "]");
+            ILogger.AddToLog(Levels.INFO, "Client [" + userServerEndPoint + "] has disconnected with id [" + userID + "]");
         }
 
         #endregion LogDisconnect

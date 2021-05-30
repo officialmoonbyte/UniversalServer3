@@ -51,7 +51,6 @@ namespace EventTestPlugin
 
             BaseClass.EventManager.OnBeforeClientRequest += (obj, args) =>
             {
-                ILogger.AddToLog("TESTINGTEST", args.RawData);
                 args.CancelRequest = Moonbyte.UniversalServer.Core.Model.Utility.MoonbyteCancelRequest.Cancel;
             };
 

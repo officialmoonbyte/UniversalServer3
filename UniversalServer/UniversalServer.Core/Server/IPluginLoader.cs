@@ -53,12 +53,12 @@ namespace Moonbyte.UniversalServer.Core.Server
                     UniversalPlugin pluginInstance = new UniversalPlugin(plugin);
                     pluginInstance.core = plugin;
 
-                    ILogger.AddToLog("INFO", "Initializing [" + pluginInstance.core.Name + "]");
+                    ILogger.AddToLog(ILogger.Levels.INFO, "Initializing [" + pluginInstance.core.Name + "]");
                     pluginInstance.core.SetUniversalPluginAPI(pluginInstance);
                     pluginInstance.core.Initialize(Path.Combine(pluginDataDirectory, pluginInstance.core.Name), pluginInstance);
 
                     returnPlugins.Add(pluginInstance);
-                    ILogger.AddToLog("INFO", "Plugin [" + pluginInstance.core.Name + "] Fully loaded!");
+                    ILogger.AddToLog(ILogger.Levels.INFO, "Plugin [" + pluginInstance.core.Name + "] Fully loaded!");
                 }
                 catch (Exception e)
                 {

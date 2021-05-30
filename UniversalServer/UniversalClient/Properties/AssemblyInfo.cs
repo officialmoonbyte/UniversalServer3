@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Moonbyte Corporation")]
 [assembly: AssemblyProduct("UniversalClient")]
-[assembly: AssemblyCopyright("Copyright © Universal Client 2019")]
+[assembly: AssemblyCopyright("Copyright © Moonbyte Corporation 2019 - 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

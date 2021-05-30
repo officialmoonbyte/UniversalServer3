@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UniversalServer.Interfaces;
+using static Crayon.Output;
 
 namespace UniversalServer.Commandline.ConsoleCommands
 {
@@ -27,11 +28,11 @@ namespace UniversalServer.Commandline.ConsoleCommands
         {
             Universalserver.TcpServers.OrderBy(x => x.ServerName).ToList().ForEach(x =>
             {
-                string onlineText = "Online!";
+                string onlineText = Green("Online!");
 
-                if (!x.IsListening) onlineText = "Offline!";
+                if (!x.IsListening) onlineText = Red("Offline!");
 
-                ILogger.AddToLog("INFO", $"{x.ServerName} : Status : {onlineText}  Clients Connected : {x.Clients}");
+                ILogger.AddToLog(ILogger.Levels.INFO, Bold($"{x.ServerName} : Status : {onlineText}  Clients Connected : {x.Clients}"));
             });
         }
     }

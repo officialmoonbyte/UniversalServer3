@@ -22,22 +22,22 @@ namespace UniversalServer.Commandline.ConsoleCommands
         }
 
         public (string, string) GetHelpCommandLog()
-            => ("Upd [ServerName / optional]", "Helps download plugins on-to servers / universal server.");
+            => ("Upd [Download-Url] [ServerName]", "Helps download plugins on-to servers / universal server.");
 
         public string GetName()
             => "UniversalPluginDownload";
 
         public void RunCommand(string[] args)
         {
-            var downloadUrl = new Uri(args[2]);
-            var server = args[1];
+            var downloadUrl = new Uri(args[1]);
+            var server = args[2];
 
             try
             {
                 using (var webClient = new WebClient())
                 {
                     string fileName = Path.GetFileName(downloadUrl.LocalPath);
-                    ILogger.AddToLog("INFO", $"Downloading plugin {fileName} for server {server}");
+                    ILogger.AddToLog(ILogger.Levels.INFO, $"Downloading plugin {fileName} for server {server}");
 
                     webClient.DownloadProgressChanged += (obj, arg) =>
                     {
@@ -46,7 +46,7 @@ namespace UniversalServer.Commandline.ConsoleCommands
                     };
                     webClient.DownloadFileCompleted += (obj, arg) =>
                     {
-                        ILogger.AddToLog("INFO", $"Downloading plugin {fileName} completed! Please restart the server.");
+                        ILogger.AddToLog(ILogger.Levels.INFO, $"Downloading plugin {fileName} completed! Please restart the server.");
                     };
 
                     var universalServer = Universalserver.TcpServers.FirstOrDefault(x => Utility.EqualsIgnoreCase(x.ServerName, server));

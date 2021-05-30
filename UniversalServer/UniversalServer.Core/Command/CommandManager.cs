@@ -1,4 +1,5 @@
 ﻿using Moonbyte.UniversalServer.Core.Client;
+using Moonbyte.UniversalServer.Core.Logging;
 using Moonbyte.UniversalServer.Core.Networking;
 using Moonbyte.UniversalServer.Core.Plugin;
 using Moonbyte.UniversalServer.Core.Server;
@@ -61,7 +62,7 @@ namespace UniversalServer.Core.Command
             if (plugin != null) 
             { 
                 sentClientData = plugin.core.Invoke(client, commandArgs);
-                server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" +plugin.core.Name + ".");
+                server.serverPluginLogger.AddToLog(ILogger.Levels.INFO, "Client [" + client.clientTracker.userID + "] has used command [" +plugin.core.Name + ".");
             }
 
             //Processes default commands
@@ -72,7 +73,7 @@ namespace UniversalServer.Core.Command
                     if (universalCommand.GetNamespace().ToLower() == commandArgs[0].ToLower())
                     {
                         bool tmpbool = universalCommand.Invoke(commandArgs, universalPacket, client);
-                        server.serverPluginLogger.AddToLog("INFO", "Client [" + client.clientTracker.userID + "] has used command [" + universalCommand.GetNamespace() + ".");
+                        server.serverPluginLogger.AddToLog(ILogger.Levels.INFO, "Client [" + client.clientTracker.userID + "] has used command [" + universalCommand.GetNamespace() + ".");
                         if (tmpbool == true) { sentClientData = true; return tmpbool; }
                     }
                 }
